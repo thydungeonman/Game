@@ -1,0 +1,38 @@
+[gd_scene load_steps=4 format=1]
+
+[ext_resource path="res://backgrounds/tilesheet/walltiles.tres" type="TileSet" id=1]
+[ext_resource path="res://player/scenes/player.tscn" type="PackedScene" id=2]
+[ext_resource path="res://enemies/scenes/enemy.tscn" type="PackedScene" id=3]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="TileMap" type="TileMap" parent="." groups=[
+"wall",
+]]
+
+transform/pos = Vector2( -40, 0 )
+mode = 0
+tile_set = ExtResource( 1 )
+cell/size = Vector2( 10, 10 )
+cell/quadrant_size = 16
+cell/custom_transform = Matrix32( 1, 0, 0, 1, 0, 0 )
+cell/half_offset = 2
+cell/tile_origin = 1
+cell/y_sort = false
+collision/use_kinematic = false
+collision/friction = 1.0
+collision/bounce = 0.0
+collision/layers = 1
+collision/mask = 1
+occluder/light_mask = 1
+tile_data = IntArray( 1441796, 0, 1441837, 0, 1507332, 0, 1507373, 0, 1572868, 0, 1572869, 0, 1572870, 0, 1572871, 0, 1572872, 0, 1572873, 0, 1572874, 0, 1572875, 0, 1572876, 0, 1572877, 0, 1572878, 0, 1572879, 0, 1572880, 0, 1572881, 0, 1572882, 0, 1572883, 0, 1572884, 0, 1572885, 0, 1572886, 0, 1572887, 0, 1572888, 0, 1572889, 0, 1572890, 0, 1572891, 0, 1572892, 0, 1572893, 0, 1572894, 0, 1572895, 0, 1572896, 0, 1572897, 0, 1572898, 0, 1572899, 0, 1572900, 0, 1572901, 0, 1572902, 0, 1572903, 0, 1572904, 0, 1572905, 0, 1572906, 0, 1572907, 0, 1572908, 0, 1572909, 0 )
+
+[node name="player" parent="." instance=ExtResource( 2 )]
+
+transform/pos = Vector2( 210, 120 )
+
+[node name="enemy" parent="." instance=ExtResource( 3 )]
+
+transform/pos = Vector2( 84, 230 )
+
+

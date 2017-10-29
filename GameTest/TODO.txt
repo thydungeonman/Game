@@ -1,0 +1,7 @@
+TODO LIST:
+	flesh out combat - different attacks - kick - punch - block - throw - counter - all of these in air as well
+	flesh out damages and health for player
+	make different types of enemies - stationary - moving - flying - jumping - main style bad guys -- tube pirates?
+	clean up game directory
+	talking - things you can walk up to and see what they say
+	
