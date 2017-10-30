@@ -43,6 +43,9 @@ var attackbreakcounter = 0.0 #counter to wait until attackbreak is up
 var attackbreak = .2
 #alternate motion variables
 var motions = []
+#input halting variables
+var canmovetimer = 2.1
+var canmovetime = 0.5
 
 
 func _ready():
@@ -55,7 +58,7 @@ func _input(event):
 
 func _process(delta):
 	#INPUTS and direction
-	GetInputs()
+	GetInputs(delta)
 	#move this into getInputs
 	if(Input.is_action_pressed("ui_jump")):
 		jumppresstime += delta
@@ -65,43 +68,45 @@ func _process(delta):
 
 
 func _fixed_process(delta):
-	#ATTACKING
-	handle_attack(delta)
-	
-	#HORIZONTAL MOVEMENT
-	HandleMovement(delta)
 	#ALTERNATE MOTIONS
 	alternate_motion(delta)
+	#ATTACKING
+	handle_attack(delta)
+	#HORIZONTAL MOVEMENT
+	HandleMovement(delta)
 
 
-func GetInputs():
-	#canmovetimer += delta
-	#if canmovetimer >= canmovetime
-	attack = Input.is_action_pressed("ui_attack")
-	if(direction):
-		input_direction = direction
-	if(not Input.is_action_pressed("ui_duck")):
-		ducking = false
-		if(Input.is_action_pressed("ui_right")):
-			direction = 1
-			player_sprite.set_flip_h(false)
-		elif(Input.is_action_pressed("ui_left")):
-			direction = -1
-			player_sprite.set_flip_h(true)
+
+func GetInputs(delta):
+	canmovetimer += delta
+	if canmovetimer >= canmovetime:
+		canmovetimer = 10 #just incase theres a problem with this rising forever
+		attack = Input.is_action_pressed("ui_attack")
+		if(direction):
+			input_direction = direction
+		if(not Input.is_action_pressed("ui_duck")):
+			ducking = false
+			if(Input.is_action_pressed("ui_right")):
+				direction = 1
+				player_sprite.set_flip_h(false)
+			elif(Input.is_action_pressed("ui_left")):
+				direction = -1
+				player_sprite.set_flip_h(true)
+			else:
+				anim.play("restpose")
+				direction = 0
 		else:
-			anim.play("restpose")
+			anim.play("duck")
 			direction = 0
+			ducking = true
 	else:
-		anim.play("duck")
 		direction = 0
-		ducking = true
 
 func HandleMovement(delta):
 	Jump(delta)
 	#HORIZONAL MOVEMENT
 	if(input_direction == - direction):
 		speed.x = 0
-		print("reset")
 	if(direction):
 		speed.x += ACCELERATION * delta
 	else:
@@ -117,9 +122,12 @@ func HandleMovement(delta):
 	
 	#COLLSIIONS
 	if(is_colliding()):
+		if(get_collider().is_in_group("enemy")):
+			print("player touch enemy")
+			get_collider().knock_player(self,-1)
+			print("sdfsd")
 		var floorvel = Vector2()
 		var normal = get_collision_normal()
-		#
 		if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE):
 			#if touched floor or floor with tolerated angle
 			onfloor = true
@@ -184,20 +192,20 @@ func handle_attack(var delta):
 
 
 func take_damage(var damage):
-	#canmovetimer = 0
+	canmovetimer = 0.0
+	
 	if(invincounter > invintime):
 		invincounter = 0.0
 		health -= damage
+		print("health is "+str(health))
 		if(health <= 0):
 			get_node("label").set_text("GAME OVER")
-			speed.y -= 200
-			speed.x += 8000 * input_direction
-			
+			speed.y -= 500
 
 #for knockbacks when taking damage
 func alternate_motion(var delta):
 	if(motions.size() > 0):
-		print(str(motions[0]))
+		#print(str(motions[0]))
 		for n in range(motions.size()):
 			var rest = move(Vector2(motions[n].x,0) * delta)
 			if(is_colliding()):
