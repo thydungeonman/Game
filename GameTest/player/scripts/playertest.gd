@@ -123,6 +123,7 @@ func HandleMovement(delta):
 	#COLLSIIONS
 	if(is_colliding()):
 		if(get_collider().is_in_group("enemy")):
+			#if touched enemy
 			print("player touch enemy")
 			get_collider().knock_player(self,-1)
 			print("sdfsd")
@@ -200,7 +201,6 @@ func take_damage(var damage):
 		print("health is "+str(health))
 		if(health <= 0):
 			get_node("label").set_text("GAME OVER")
-			speed.y -= 500
 
 #for knockbacks when taking damage
 func alternate_motion(var delta):
@@ -251,7 +251,10 @@ func add_horizontal_motion(var motion):
 	motions.append(motion)
 	#x is the horizontal motion
 	#y is how much to lower that per second multiplied my delta
+	#remember that the second value must be the same sign as the first as the second is subtracted from the first
 func add_vertical_motion(var motion):
 	speed.y += motion
+	airtime = 0.0
+	
 
 
