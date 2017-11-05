@@ -266,6 +266,7 @@ func take_damage(var damage):
 	if(invincounter > invintime):
 		invincounter = 0.0
 		health -= damage
+		speed.y = 0
 		print("health is "+str(health))
 		if(health <= 0):
 			get_node("label").set_text("GAME OVER")
@@ -276,27 +277,27 @@ func alternate_motion(var delta):
 		#print(str(motions[0]))
 		for n in range(motions.size()):
 			var rest = move(Vector2(motions[n].x,0) * delta)
-			if(is_colliding()):
-				var floorvel = Vector2()
-				var normal = get_collision_normal()
-				if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE):
-					#if touched floor or floor with tolerated angle
-					onfloor = true
-					jumping = false
-					jumppresstime = 0.0
-					jump_count = 0
-					speed.y = normal.slide(Vector2(0,speed.y)).y
-					floorvel = get_collider_velocity()
-					get_node("normallabel").set_text(str(airtime))
-					get_node("Label").set_text(str(presstime))
-					rest = normal.slide(rest)
-					velocity = normal.slide(velocity)
-					move(rest)
-				if(normal == Vector2(1,0) or normal == Vector2(-1,0)):
-					# if hit flat wall
-					motions[n].x = 0 
-			elif(!is_colliding() and onfloor == true):
-				onfloor = false
+#			if(is_colliding()):
+#				var floorvel = Vector2()
+#				var normal = get_collision_normal()
+#				if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE):
+#					#if touched floor or floor with tolerated angle
+#					onfloor = true
+#					jumping = false
+#					jumppresstime = 0.0
+#					jump_count = 0
+#					speed.y = normal.slide(Vector2(0,speed.y)).y
+#					floorvel = get_collider_velocity()
+#					get_node("normallabel").set_text(str(airtime))
+#					get_node("Label").set_text(str(presstime))
+#					rest = normal.slide(rest)
+#					velocity = normal.slide(velocity)
+#					move(rest)
+#				if(normal == Vector2(1,0) or normal == Vector2(-1,0)):
+#					# if hit flat wall
+#					motions[n].x = 0 
+#			elif(!is_colliding() and onfloor == true):
+#				onfloor = false
 			motions[n].x -= motions[n].y
 		var finished = null
 		for n in motions:
