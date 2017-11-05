@@ -41,26 +41,18 @@ func _fixed_process(delta):
 	#MOVEMENT
 	velocity = speed * delta
 	move(velocity)
-	print("wallright = " + str(wallright.is_colliding()))
-	print("wallleft = " + str(wallleft.is_colliding()))
-	if(wallright.is_colliding() or not right.is_colliding()):
+	if(wallright.is_colliding() and !wallright.get_collider().is_in_group("player") or not right.is_colliding()):
 		direction = -1
-		print(str(get_pos()))
 		revert_motion()
 		speed.x *= -1
-		print(str(get_pos()))
 		velocity = speed * delta
 		move(velocity)
-		print(str(get_pos()))
 		knockbackforce *= -1
 		flip = !flip
 		get_node("Sprite").set_flip_h(flip)
-	if(wallleft.is_colliding() or not left.is_colliding()):
+	if(wallleft.is_colliding() and !wallleft.get_collider().is_in_group("player") or not left.is_colliding()):
 		direction = 1
 		revert_motion()
-		print("wallright = " + str(wallright.is_colliding()))
-		print("wallleft = " + str(wallleft.is_colliding()))
-		print("back")
 		speed.x *= -1
 		velocity = speed * delta
 		move(velocity)

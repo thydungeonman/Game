@@ -35,7 +35,7 @@ var invincounter = 0.0
 var invintime = 1.5
 #duck variable
 var ducking = false
-#Attact variables
+#Attack variables
 var attack = false
 var attacking = false
 var attacktime = 0.0
@@ -46,8 +46,19 @@ var motions = []
 #input halting variables
 var canmovetimer = 2.1
 var canmovetime = 0.5
+#input buffer variables
+var inputtimer = 0.0
+var sincelastinput = 0.0
+var inputbuffer = []
+var down = false
+var right = false
+var left = false
+var up = false
+var B = false
+var value = 0.0
 
-
+onready var inplabel = get_node("inputlabel")
+onready var molabel = get_node("motionlabel")
 func _ready():
 	set_fixed_process(true)
 	set_process(true)
@@ -59,12 +70,8 @@ func _input(event):
 func _process(delta):
 	#INPUTS and direction
 	GetInputs(delta)
-	#move this into getInputs
-	if(Input.is_action_pressed("ui_jump")):
-		jumppresstime += delta
-		presstime+= delta
-	else:
-		jumppresstime = 0.0
+	
+
 
 
 func _fixed_process(delta):
@@ -74,8 +81,64 @@ func _fixed_process(delta):
 	handle_attack(delta)
 	#HORIZONTAL MOVEMENT
 	HandleMovement(delta)
+	#INPUT BUFFER FOR COMPLEX INPUTS
+	handle_input_buffer(delta)
+	molabel.set_text("")
+	for x in motions:
+		molabel.set_text(molabel.get_text() + str(x) + "\n")
 
 
+
+func handle_input_buffer(delta):
+	inputtimer += delta
+	sincelastinput += delta
+#	if inputtimer > 0.4:
+#		if inputbuffer.size() > 0:
+#			inputbuffer.pop_front()
+#			inputtimer = 0.0
+	if inputbuffer.size() >= 2:
+		if inputbuffer[inputbuffer.size() - 1] == "right" and inputbuffer[inputbuffer.size() - 2] == "right" and value < .2:
+			add_horizontal_motion(Vector2(400,20))
+			inputbuffer.clear()
+		elif inputbuffer[inputbuffer.size() - 1] == "left" and inputbuffer[inputbuffer.size() - 2] == "left" and value < .2:
+			add_horizontal_motion(Vector2(-400,-20))
+			inputbuffer.clear()
+	inplabel.set_text("")
+	for x in inputbuffer:
+		inplabel.set_text(inplabel.get_text() + str(x) + "\n" )
+	if Input.is_action_pressed("ui_right"):
+		if !right:
+			inputbuffer.append("right")
+			value = sincelastinput
+			sincelastinput = 0.0
+		right = true
+	else:
+		right = false
+	if Input.is_action_pressed("ui_left"):
+		if !left:
+			inputbuffer.append("left")
+			value = sincelastinput
+			sincelastinput = 0.0
+		left = true
+	else:
+		left = false
+	if Input.is_action_pressed("ui_attack"):
+		if !B:
+			inputbuffer.append("attack")
+			value = sincelastinput
+			sincelastinput = 0.0
+		B = true
+	else:
+		B = false
+	if Input.is_action_pressed("ui_duck"):
+		if !down:
+			inputbuffer.append("down")
+			value = sincelastinput
+			sincelastinput = 0.0
+		down = true
+	else:
+		down = false
+	
 
 func GetInputs(delta):
 	canmovetimer += delta
@@ -101,6 +164,11 @@ func GetInputs(delta):
 			ducking = true
 	else:
 		direction = 0
+	if(Input.is_action_pressed("ui_jump")):
+		jumppresstime += delta
+		presstime+= delta
+	else:
+		jumppresstime = 0.0
 
 func HandleMovement(delta):
 	Jump(delta)

@@ -12,4 +12,4 @@ func _fixed_process(delta):
 	if(self.get_overlapping_bodies().size() > 0):
 		for i in get_overlapping_bodies():
 			if(i.is_in_group("enemy")):
-				i.take_damage(4)
+				i.take_damage(5)
