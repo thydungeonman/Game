@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=1]
+[gd_scene load_steps=8 format=1]
 
 [ext_resource path="res://enemies/scripts/Enemy.gd" type="Script" id=1]
 [ext_resource path="res://enemies/sprites/fireguy20000.png" type="Texture" id=2]
@@ -11,7 +11,35 @@ extents = Vector2( 8, 10 )
 
 [sub_resource type="Animation" id=2]
 
-resource/name = "restpose"
+resource/name = "death"
+length = 0.4
+loop = false
+step = 0.1
+tracks/0/type = "value"
+tracks/0/path = NodePath("Particles2D:config/emitting")
+tracks/0/interp = 1
+tracks/0/imported = false
+tracks/0/keys = {
+"times": FloatArray( 0 ),
+"transitions": FloatArray( 1 ),
+"update": 1,
+"values": [ true ]
+}
+tracks/1/type = "method"
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/imported = false
+tracks/1/keys = {
+"times": FloatArray( 0.4 ),
+"transitions": FloatArray( 1 ),
+"values": [ {
+"args": [  ],
+"method": "die"
+} ]
+}
+
+[sub_resource type="Animation" id=3]
+
 length = 0.01
 loop = false
 step = 0.1
@@ -26,9 +54,8 @@ tracks/0/keys = {
 "values": [ ExtResource( 2 ) ]
 }
 
-[sub_resource type="Animation" id=3]
+[sub_resource type="Animation" id=4]
 
-resource/name = "walk"
 length = 0.4
 loop = true
 step = 0.1
@@ -96,8 +123,9 @@ type_mask = 15
 playback/process_mode = 1
 playback/default_blend_time = 0.0
 root/root = NodePath("..")
-anims/restpose = SubResource( 2 )
-anims/walk = SubResource( 3 )
+anims/death = SubResource( 2 )
+anims/restpose = SubResource( 3 )
+anims/walk = SubResource( 4 )
 playback/active = true
 playback/speed = 1.0
 blend_times = [  ]
@@ -110,5 +138,31 @@ enabled = true
 cast_to = Vector2( -5, 0 )
 layer_mask = 1
 type_mask = 15
+
+[node name="Particles2D" type="Particles2D" parent="."]
+
+config/amount = 26
+config/lifetime = 0.314088
+config/time_scale = 1.32
+config/emit_timeout = 850.9
+config/emitting = false
+config/process_mode = 1
+params/direction = 0.0
+params/spread = 180.0
+params/linear_velocity = 40.0
+params/spin_velocity = 0.0
+params/orbit_velocity = 0.0
+params/gravity_direction = 0.0
+params/gravity_strength = 9.8
+params/radial_accel = 0.0
+params/tangential_accel = 0.0
+params/damping = 0.0
+params/initial_angle = 0.0
+params/initial_size = 0.0
+params/final_size = 1.5
+params/hue_variation = 0.0
+params/anim_speed_scale = 1.0
+params/anim_initial_pos = 0.0
+color/color = Color( 0.853924, 0.972656, 0.0227966, 1 )
 
 

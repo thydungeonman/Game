@@ -190,7 +190,7 @@ func HandleMovement(delta):
 	
 	#COLLSIIONS
 	if(is_colliding()):
-		if(get_collider().is_in_group("enemy")):
+		if(get_collider().is_in_group("enemy") and invincounter > invintime):
 			#if touched enemy
 			print("player touch enemy")
 			get_collider().knock_player(self,-1)
@@ -262,7 +262,6 @@ func handle_attack(var delta):
 
 func take_damage(var damage):
 	canmovetimer = 0.0
-	
 	if(invincounter > invintime):
 		invincounter = 0.0
 		health -= damage
