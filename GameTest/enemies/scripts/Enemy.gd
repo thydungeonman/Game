@@ -45,7 +45,7 @@ func _fixed_process(delta):
 		#MOVEMENT
 		velocity = speed * delta
 		move(velocity)
-		if(wallright.is_colliding() and !wallright.get_collider().is_in_group("player") or not right.is_colliding()):
+		if(wallright.is_colliding() and wallright.get_collider().is_in_group("wall") or not right.is_colliding()):
 			direction = -1
 			revert_motion()
 			speed.x *= -1
@@ -54,7 +54,7 @@ func _fixed_process(delta):
 			knockbackforce *= -1
 			flip = !flip
 			get_node("Sprite").set_flip_h(flip)
-		if(wallleft.is_colliding() and !wallleft.get_collider().is_in_group("player") or not left.is_colliding()):
+		if(wallleft.is_colliding() and wallleft.get_collider().is_in_group("wall") or not left.is_colliding()):
 			direction = 1
 			revert_motion()
 			speed.x *= -1
@@ -65,11 +65,19 @@ func _fixed_process(delta):
 			get_node("Sprite").set_flip_h(flip)
 			#forward.set_cast_to(Vector2(forward.get_cast_to().x * -1,0))
 			#forward.set_pos(Vector2(forward.get_pos().x * -1,0))
+		if(is_colliding() and get_collider().is_in_group("enemy")):
+			direction *= -1
+			revert_motion()
+			speed.x *= -1
+			velocity = speed * delta
+			move(velocity)
+			knockbackforce *= -1
+			flip = !flip
+			get_node("Sprite").set_flip_h(flip)
 		if(is_colliding() and get_collider().is_in_group("player") and cangivedamage):
 			print("enemy hit player")
 			var player = get_collider()
 			knock_player(player)
-	
 	
 
 func die():
@@ -81,15 +89,22 @@ func take_damage(var damage):
 		damagetaketimer = 0.0
 		health -= damage
 		if(health <= 0):
+			cangivedamage = false
+			damagegivetimer = 0.0
 			state = 2
 			speed.x = 0
+			get_node("Sprite").set_opacity(0)
+			set_layer_mask(2)
+			set_collision_mask(2)
 			animator.play("death")
 
 func knock_player(var player, var direction = 1):
-	if(cangivedamage):
+	if(cangivedamage and player.invincounter > player.invintime):
 		var alteredknockbackforce = knockbackforce * direction
 		player.add_horizontal_motion(alteredknockbackforce)
 		player.add_vertical_motion(-200)
-		player.take_damage(5)
+		player.take_damage(1)
 		damagegivetimer = 0.0
 		cangivedamage = false
+		player.invincounter = 0.0
+		player.anim.play("invincible")

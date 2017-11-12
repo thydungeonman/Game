@@ -53,6 +53,16 @@ tracks/0/keys = {
 "update": 1,
 "values": [ ExtResource( 2 ) ]
 }
+tracks/1/type = "value"
+tracks/1/path = NodePath("Particles2D:config/emitting")
+tracks/1/interp = 1
+tracks/1/imported = false
+tracks/1/keys = {
+"times": FloatArray( 0 ),
+"transitions": FloatArray( 1 ),
+"update": 1,
+"values": [ false ]
+}
 
 [sub_resource type="Animation" id=4]
 
@@ -164,5 +174,19 @@ params/hue_variation = 0.0
 params/anim_speed_scale = 1.0
 params/anim_initial_pos = 0.0
 color/color = Color( 0.853924, 0.972656, 0.0227966, 1 )
+
+[node name="Label" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 2.0
+margin/top = -42.0
+margin/right = 42.0
+margin/bottom = -28.0
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
 
 

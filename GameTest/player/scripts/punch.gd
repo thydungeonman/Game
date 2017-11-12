@@ -7,6 +7,7 @@ func _ready():
 
 func _fixed_process(delta):
 	count += delta
+	print("punch")
 	if(count > punchtime):
 		self.queue_free()
 	if(self.get_overlapping_bodies().size() > 0):

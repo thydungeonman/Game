@@ -75,6 +75,7 @@ func _process(delta):
 
 
 func _fixed_process(delta):
+	get_node("label").set_text(str(airtime))
 	#ALTERNATE MOTIONS
 	alternate_motion(delta)
 	#ATTACKING
@@ -147,21 +148,35 @@ func GetInputs(delta):
 		attack = Input.is_action_pressed("ui_attack")
 		if(direction):
 			input_direction = direction
-		if(not Input.is_action_pressed("ui_duck")):
-			ducking = false
-			if(Input.is_action_pressed("ui_right")):
-				direction = 1
-				player_sprite.set_flip_h(false)
-			elif(Input.is_action_pressed("ui_left")):
+		if Input.is_action_pressed("ui_right"):
+			direction = 1
+			player_sprite.set_flip_h(false)
+		elif(Input.is_action_pressed("ui_left")):
 				direction = -1
 				player_sprite.set_flip_h(true)
-			else:
-				anim.play("restpose")
-				direction = 0
-		else:
+		elif Input.is_action_pressed("ui_duck"):
 			anim.play("duck")
-			direction = 0
 			ducking = true
+			direction = 0
+		else:
+			anim.play("restpose")
+			ducking = false
+			direction = 0
+#		if(not Input.is_action_pressed("ui_duck")):
+#			ducking = false
+#			if(Input.is_action_pressed("ui_right")):
+#				direction = 1
+#				player_sprite.set_flip_h(false)
+#			elif(Input.is_action_pressed("ui_left")):
+#				direction = -1
+#				player_sprite.set_flip_h(true)
+#			else:
+#				anim.play("restpose")
+#				direction = 0
+#		else:
+#			anim.play("duck")
+#			direction = 0
+#			ducking = true
 	else:
 		direction = 0
 	if(Input.is_action_pressed("ui_jump")):
@@ -194,12 +209,14 @@ func HandleMovement(delta):
 			#if touched enemy
 			print("player touch enemy")
 			get_collider().knock_player(self,-1)
+			anim.play("invincible")
 			print("sdfsd")
 		var floorvel = Vector2()
 		var normal = get_collision_normal()
 		if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE):
 			#if touched floor or floor with tolerated angle
 			onfloor = true
+			airtime = 0.0
 			jumping = false
 			jumppresstime = 0.0
 			jump_count = 0
@@ -230,7 +247,7 @@ func HandleMovement(delta):
 func Jump(delta):
 	if(Input.is_action_pressed("ui_jump")):
 	#if pressed jump button and havent jumped more times than allowed and on the floor
-		if(onfloor and jump_count < max_jump_count and jumppresstime < .035):
+		if((onfloor or airtime <.05) and jump_count < max_jump_count and jumppresstime < .035):
 			presstime= 0
 			airtime = 0.0
 			speed.y = -LOW_JUMP_FORCE
@@ -250,6 +267,7 @@ func handle_attack(var delta):
 		self.add_child(attack)
 		attack.set_pos(Vector2(input_direction * 15,0))
 		attackbreakcounter = 0.0
+		add_horizontal_motion(Vector2(100 * input_direction,10 * input_direction))
 	elif(attack and not attacking and ducking and attackbreakcounter > attackbreak):
 		var attack = preload("res://player/scenes/kick.tscn").instance()
 		self.add_child(attack)
@@ -262,6 +280,8 @@ func handle_attack(var delta):
 
 func take_damage(var damage):
 	canmovetimer = 0.0
+	get_node("label").set_text(str(health))
+	attackbreakcounter = 0.0
 	if(invincounter > invintime):
 		invincounter = 0.0
 		health -= damage
