@@ -1,4 +1,7 @@
 extends KinematicBody2D
+#test script for player input and movement
+#as inelegant as it is, most things work around resetting timers
+#try to find a better solution - state machine maybe
 
 #movement variables
 var direction = 0
@@ -28,11 +31,12 @@ var jumping = false
 #sprite for flipping
 onready var player_sprite = get_node("Sprite")
 onready var anim = get_node("AnimationPlayer")
-#game variables
+#health and damage variables
 var health = 10
 var presstime= 0.0
-var invincounter = 0.0
-var invintime = 1.5
+var invincounter = 0.0  
+var invintime = 1.5 # make sure this is synced up with the blink time
+var damageblinktimer = 5 #this is high so the player doesnt start blinking
 #duck variable
 var ducking = false
 #Attack variables
@@ -41,6 +45,12 @@ var attacking = false
 var attacktime = 0.0
 var attackbreakcounter = 0.0 #counter to wait until attackbreak is up
 var attackbreak = .2
+#deflecting variables
+var deflect = false
+var deflecting = false
+var deflecttime = 0.0
+var deflectbreakcounter = 0.0
+var deflectbreak = .5
 #alternate motion variables
 var motions = []
 #input halting variables
@@ -59,6 +69,9 @@ var value = 0.0
 
 onready var inplabel = get_node("inputlabel")
 onready var molabel = get_node("motionlabel")
+
+
+
 func _ready():
 	set_fixed_process(true)
 	set_process(true)
@@ -70,7 +83,6 @@ func _input(event):
 func _process(delta):
 	#INPUTS and direction
 	GetInputs(delta)
-	
 
 
 
@@ -80,6 +92,8 @@ func _fixed_process(delta):
 	alternate_motion(delta)
 	#ATTACKING
 	handle_attack(delta)
+	#DEFLECTING
+	handle_delfect(delta)
 	#HORIZONTAL MOVEMENT
 	HandleMovement(delta)
 	#INPUT BUFFER FOR COMPLEX INPUTS
@@ -87,6 +101,8 @@ func _fixed_process(delta):
 	molabel.set_text("")
 	for x in motions:
 		molabel.set_text(molabel.get_text() + str(x) + "\n")
+	get_node("invinlabel").set_text(str(invincounter))
+	damage_blink(delta)
 
 
 
@@ -146,6 +162,7 @@ func GetInputs(delta):
 	if canmovetimer >= canmovetime:
 		canmovetimer = 10 #just incase theres a problem with this rising forever
 		attack = Input.is_action_pressed("ui_attack")
+		deflect = Input.is_action_pressed("ui_deflect")
 		if(direction):
 			input_direction = direction
 		if Input.is_action_pressed("ui_right"):
@@ -207,9 +224,10 @@ func HandleMovement(delta):
 	if(is_colliding()):
 		if(get_collider().is_in_group("enemy") and invincounter > invintime):
 			#if touched enemy
+			damageblinktimer = 0.0
 			print("player touch enemy")
 			get_collider().knock_player(self,-1)
-			anim.play("invincible")
+			#anim.play("invincible")
 			print("sdfsd")
 		var floorvel = Vector2()
 		var normal = get_collision_normal()
@@ -276,10 +294,17 @@ func handle_attack(var delta):
 		attackbreakcounter = 0.0
 	attacking = attack
 
-
+func handle_delfect(var delta):
+	deflectbreakcounter += delta
+	if(deflect and not deflecting and not attacking and deflectbreakcounter > deflectbreak):
+		var deflect = preload("res://player/scenes/deflect.tscn").instance()
+		self.add_child(deflect)
+		deflect.set_pos(Vector2(input_direction * 15,0))
+		deflectbreakcounter = 0.0
 
 func take_damage(var damage):
 	canmovetimer = 0.0
+	damageblinktimer = 0.0
 	get_node("label").set_text(str(health))
 	attackbreakcounter = 0.0
 	if(invincounter > invintime):
@@ -343,6 +368,14 @@ func add_horizontal_motion(var motion):
 func add_vertical_motion(var motion):
 	speed.y += motion
 	airtime = 0.0
-	
+
+#reset damageblink timer to blink
+func damage_blink(delta):
+	damageblinktimer += delta
+	if(damageblinktimer < 1.5):
+		if((fmod(damageblinktimer,.33)) > .17):
+			player_sprite.hide()
+		else:
+			player_sprite.show()
 
 

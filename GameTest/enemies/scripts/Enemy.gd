@@ -107,4 +107,3 @@ func knock_player(var player, var direction = 1):
 		damagegivetimer = 0.0
 		cangivedamage = false
 		player.invincounter = 0.0
-		player.anim.play("invincible")
