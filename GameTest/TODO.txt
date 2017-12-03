@@ -10,3 +10,13 @@ sort out the knock player and give damage functions. it should be either both at
 If an enemy can't give damage then it shouldn't knock the player back.
 
 try making punch and kick bigger and adding a bit of forward motion with them to see how it feels
+
+Enemies to make:
+
+motionless hazards,
+slowmoving hazards,
+shooting,
+shooting and moving,
+reactionary - similar to zelda2 knights,
+jumping,
+flying,

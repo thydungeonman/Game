@@ -2,6 +2,7 @@ extends KinematicBody2D
 #test script for player input and movement
 #as inelegant as it is, most things work around resetting timers
 #try to find a better solution - state machine maybe
+#TODO separate add_vertical_motion from jump variables
 
 #movement variables
 var direction = 0
@@ -222,11 +223,11 @@ func HandleMovement(delta):
 	
 	#COLLSIIONS
 	if(is_colliding()):
-		if(get_collider().is_in_group("enemy") and invincounter > invintime):
+		if(get_collider().is_in_group("enemy") or get_collider().is_in_group("projectile") and invincounter > invintime):
 			#if touched enemy
 			damageblinktimer = 0.0
 			print("player touch enemy")
-			get_collider().knock_player(self,-1)
+			get_collider().knock_player(self,-input_direction)
 			#anim.play("invincible")
 			print("sdfsd")
 		var floorvel = Vector2()
@@ -297,10 +298,10 @@ func handle_attack(var delta):
 func handle_delfect(var delta):
 	deflectbreakcounter += delta
 	if(deflect and not deflecting and not attacking and deflectbreakcounter > deflectbreak):
+		deflectbreakcounter = 0.0
 		var deflect = preload("res://player/scenes/deflect.tscn").instance()
 		self.add_child(deflect)
 		deflect.set_pos(Vector2(input_direction * 15,0))
-		deflectbreakcounter = 0.0
 
 func take_damage(var damage):
 	canmovetimer = 0.0

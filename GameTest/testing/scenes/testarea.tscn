@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=1]
+[gd_scene load_steps=5 format=1]
 
 [ext_resource path="res://enemies/scenes/enemy.tscn" type="PackedScene" id=1]
 [ext_resource path="res://backgrounds/tilesheet/walltiles.tres" type="TileSet" id=2]
 [ext_resource path="res://player/scenes/player.tscn" type="PackedScene" id=3]
+[ext_resource path="res://enemies/scenes/shootingguy.tscn" type="PackedScene" id=4]
 
 [node name="Node2D" type="Node2D"]
 
@@ -37,5 +38,9 @@ transform/pos = Vector2( 40, 535 )
 [node name="enemy 4" parent="." instance=ExtResource( 1 )]
 
 transform/pos = Vector2( -125, 490 )
+
+[node name="shootingguy" parent="." instance=ExtResource( 4 )]
+
+transform/pos = Vector2( -120, 540 )
 
 

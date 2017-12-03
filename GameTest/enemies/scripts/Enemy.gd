@@ -12,7 +12,7 @@ var damagegivetime = 0.25
 var cangivedamage = true
 var direction = 1
 var velocity = 0.0
-var state = 1
+var state = 1 #0 = dead 1 = walking 2 = stun
 
 onready var left = get_node("downleft")
 onready var right = get_node("downright")
@@ -51,7 +51,6 @@ func _fixed_process(delta):
 			speed.x *= -1
 			velocity = speed * delta
 			move(velocity)
-			knockbackforce *= -1
 			flip = !flip
 			get_node("Sprite").set_flip_h(flip)
 		if(wallleft.is_colliding() and wallleft.get_collider().is_in_group("wall") or not left.is_colliding()):
@@ -60,7 +59,6 @@ func _fixed_process(delta):
 			speed.x *= -1
 			velocity = speed * delta
 			move(velocity)
-			knockbackforce *= -1
 			flip = !flip
 			get_node("Sprite").set_flip_h(flip)
 			#forward.set_cast_to(Vector2(forward.get_cast_to().x * -1,0))
@@ -71,13 +69,14 @@ func _fixed_process(delta):
 			speed.x *= -1
 			velocity = speed * delta
 			move(velocity)
-			knockbackforce *= -1
 			flip = !flip
 			get_node("Sprite").set_flip_h(flip)
 		if(is_colliding() and get_collider().is_in_group("player") and cangivedamage):
 			print("enemy hit player")
 			var player = get_collider()
-			knock_player(player)
+			knock_player(player,direction)
+	elif(state == 2):
+		pass
 	
 
 func die():
@@ -91,7 +90,7 @@ func take_damage(var damage):
 		if(health <= 0):
 			cangivedamage = false
 			damagegivetimer = 0.0
-			state = 2
+			state = 0
 			speed.x = 0
 			get_node("Sprite").set_opacity(0)
 			set_layer_mask(2)
@@ -99,6 +98,7 @@ func take_damage(var damage):
 			animator.play("death")
 
 func knock_player(var player, var direction = 1):
+	print(str(direction))
 	if(cangivedamage and player.invincounter > player.invintime):
 		var alteredknockbackforce = knockbackforce * direction
 		player.add_horizontal_motion(alteredknockbackforce)
