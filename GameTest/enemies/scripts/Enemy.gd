@@ -12,7 +12,7 @@ var damagegivetime = 0.25
 var cangivedamage = true
 var direction = 1
 var velocity = 0.0
-var state = 1 #0 = dead 1 = walking 2 = stun
+var state = 1 #0 = dead 1 = walking 2 = stun # make enum some day
 
 onready var left = get_node("downleft")
 onready var right = get_node("downright")
@@ -28,7 +28,7 @@ func _ready():
 
 func _fixed_process(delta):
 	
-	if(state == 1):
+	if(state == 1): #alive
 		#KEEP TIME
 		damagegivetimer += delta
 		damagetaketimer += delta
@@ -75,7 +75,7 @@ func _fixed_process(delta):
 			print("enemy hit player")
 			var player = get_collider()
 			knock_player(player,direction)
-	elif(state == 2):
+	elif(state == 2): #stunned
 		pass
 	
 
@@ -102,7 +102,7 @@ func knock_player(var player, var direction = 1):
 	if(cangivedamage and player.invincounter > player.invintime):
 		var alteredknockbackforce = knockbackforce * direction
 		player.add_horizontal_motion(alteredknockbackforce)
-		player.add_vertical_motion(-200)
+		player.add_vertical_motion(Vector2(-200,-8))
 		player.take_damage(1)
 		damagegivetimer = 0.0
 		cangivedamage = false

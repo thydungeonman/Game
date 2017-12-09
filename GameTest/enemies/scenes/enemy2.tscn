@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=1]
+
+[ext_resource path="res://enemies/scenes/enemy.tscn" type="PackedScene" id=1]
+[ext_resource path="res://enemies/scenes/enemy2.gd" type="Script" id=2]
+
+[node name="enemy" instance=ExtResource( 1 )]
+
+transform/pos = Vector2( 0.5, -0.5 )
+transform/scale = Vector2( 2, 2 )
+script/script = ExtResource( 2 )
+
+[node name="forward" parent="."]
+
+transform/pos = Vector2( 10.25, 7.75 )
+
+[node name="back" parent="."]
+
+transform/pos = Vector2( -10.25, 8.25 )
+
+

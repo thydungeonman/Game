@@ -16,6 +16,9 @@ func _fixed_process(delta):
 		var collider = get_collider()
 		if(collider.is_in_group("wall") or collider.is_in_group("projectile")):
 			queue_free()
+		elif(collider.is_in_group("enemy")):
+			collider.take_damage(1)
+			queue_free()
 		elif(collider.is_in_group("player")):
 			if(!facingright):
 				direction = -1

@@ -2,7 +2,7 @@
 #shoottimer reaches shoottime
 extends KinematicBody2D
 var shoottimer = 0.0
-var shoottime = .3
+var shoottime = 1
 onready var facingright = !get_node("Sprite").is_flipped_h() 
 var health = 5
 var isalive = true

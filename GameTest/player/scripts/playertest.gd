@@ -54,6 +54,8 @@ var deflectbreakcounter = 0.0
 var deflectbreak = .5
 #alternate motion variables
 var motions = []
+#alternate verical motion variables
+var verticalmotions = []
 #input halting variables
 var canmovetimer = 2.1
 var canmovetime = 0.5
@@ -70,7 +72,6 @@ var value = 0.0
 
 onready var inplabel = get_node("inputlabel")
 onready var molabel = get_node("motionlabel")
-
 
 
 func _ready():
@@ -91,6 +92,7 @@ func _fixed_process(delta):
 	get_node("label").set_text(str(airtime))
 	#ALTERNATE MOTIONS
 	alternate_motion(delta)
+	alternate_vertical_motion(delta)
 	#ATTACKING
 	handle_attack(delta)
 	#DEFLECTING
@@ -99,8 +101,9 @@ func _fixed_process(delta):
 	HandleMovement(delta)
 	#INPUT BUFFER FOR COMPLEX INPUTS
 	handle_input_buffer(delta)
+	
 	molabel.set_text("")
-	for x in motions:
+	for x in verticalmotions:
 		molabel.set_text(molabel.get_text() + str(x) + "\n")
 	get_node("invinlabel").set_text(str(invincounter))
 	damage_blink(delta)
@@ -360,6 +363,17 @@ func alternate_motion(var delta):
 	#the enemy affecting the array directly
 	#also fix function
 	#TODO get it to go towards zero
+func alternate_vertical_motion(delta):
+	if(verticalmotions.size() > 0):
+		for n in range(verticalmotions.size()):
+			var rest = move(Vector2(0,verticalmotions[n].x) * delta)
+			verticalmotions[n].x -= verticalmotions[n].y
+		var finished = null
+		for n in verticalmotions:
+			if(n.x <= 20 and n.x >= -20):
+				finished = n
+		if(finished != null):
+			verticalmotions.remove(verticalmotions.find(finished))
 
 func add_horizontal_motion(var motion):
 	motions.append(motion)
@@ -367,7 +381,7 @@ func add_horizontal_motion(var motion):
 	#y is how much to lower that per second multiplied my delta
 	#remember that the second value must be the same sign as the first as the second is subtracted from the first
 func add_vertical_motion(var motion):
-	speed.y += motion
+	verticalmotions.append(motion)
 	airtime = 0.0
 
 #reset damageblink timer to blink
