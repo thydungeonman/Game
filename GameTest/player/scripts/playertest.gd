@@ -6,7 +6,7 @@ extends KinematicBody2D
 
 #movement variables
 var direction = 0
-var input_direction = 0
+var input_direction = 1
 var speed_x = 0
 var speed_y = 0
 var speed = Vector2()
@@ -226,7 +226,7 @@ func HandleMovement(delta):
 	
 	#COLLSIIONS
 	if(is_colliding()):
-		if(get_collider().is_in_group("enemy") or get_collider().is_in_group("projectile") and invincounter > invintime):
+		if((get_collider().is_in_group("enemy") and get_collider().state != 2) or get_collider().is_in_group("projectile") and invincounter > invintime):
 			#if touched enemy
 			damageblinktimer = 0.0
 			print("player touch enemy")

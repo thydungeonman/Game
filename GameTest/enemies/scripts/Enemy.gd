@@ -1,10 +1,10 @@
 extends KinematicBody2D
 
 #ENEMY VARIABLES
-var health = 5
+var health = 30
 var speed = Vector2(15,0)
 var damagetaketimer= 0.0
-var damagetaketime = .19
+var damagetaketime = .1
 var cantakedamage = false
 var knockbackforce = Vector2(200,7)
 var damagegivetimer = 0.0
@@ -13,6 +13,9 @@ var cangivedamage = true
 var direction = 1
 var velocity = 0.0
 var state = 1 #0 = dead 1 = walking 2 = stun # make enum some day
+var motions = []
+var stuncounter = 0.0
+var stuncount = .5
 
 onready var left = get_node("downleft")
 onready var right = get_node("downright")
@@ -21,26 +24,28 @@ onready var wallleft = get_node("back")
 var flip = false
 onready var animator = get_node("AnimationPlayer")
 onready var particles = get_node("Particles2D")
+onready var healthlabel = get_node("healthlabel")
 
 func _ready():
 	set_fixed_process(true)
 	animator.play("walk")
 
 func _fixed_process(delta):
+	healthlabel.set_text(str(health))
+	alternate_motion(delta)
+	damagegivetimer += delta
+	damagetaketimer += delta
 	
+	if(damagetaketimer > damagetaketime):
+		cantakedamage = true
+	else:
+		cantakedamage = false
+	if(damagegivetimer >= damagegivetime):
+		cangivedamage = true
+	else:
+		cangivedamage = false
 	if(state == 1): #alive
 		#KEEP TIME
-		damagegivetimer += delta
-		damagetaketimer += delta
-		
-		if(damagetaketimer > damagetaketime):
-			cantakedamage = true
-		else:
-			cantakedamage = false
-		if(damagegivetimer >= damagegivetime):
-			cangivedamage = true
-		else:
-			cangivedamage = false
 			
 		#MOVEMENT
 		velocity = speed * delta
@@ -61,8 +66,6 @@ func _fixed_process(delta):
 			move(velocity)
 			flip = !flip
 			get_node("Sprite").set_flip_h(flip)
-			#forward.set_cast_to(Vector2(forward.get_cast_to().x * -1,0))
-			#forward.set_pos(Vector2(forward.get_pos().x * -1,0))
 		if(is_colliding() and get_collider().is_in_group("enemy")):
 			direction *= -1
 			revert_motion()
@@ -76,6 +79,11 @@ func _fixed_process(delta):
 			var player = get_collider()
 			knock_player(player,direction)
 	elif(state == 2): #stunned
+		stuncounter += delta
+		if(stuncounter > stuncount):
+			stuncounter = 0
+			state = 1
+			animator.play("walk")
 		pass
 	
 
@@ -84,6 +92,8 @@ func die():
 
 func take_damage(var damage):
 	if(cantakedamage):
+		animator.play("stunned")
+		state = 2
 		cantakedamage = false
 		damagetaketimer = 0.0
 		health -= damage
@@ -107,3 +117,40 @@ func knock_player(var player, var direction = 1):
 		damagegivetimer = 0.0
 		cangivedamage = false
 		player.invincounter = 0.0
+
+func alternate_motion(var delta):
+	if(motions.size() > 0):
+		#print(str(motions[0]))
+		for n in range(motions.size()):
+			var rest = move(Vector2(motions[n].x,0) * delta)
+#			if(is_colliding()):
+#				var floorvel = Vector2()
+#				var normal = get_collision_normal()
+#				if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE):
+#					#if touched floor or floor with tolerated angle
+#					onfloor = true
+#					jumping = false
+#					jumppresstime = 0.0
+#					jump_count = 0
+#					speed.y = normal.slide(Vector2(0,speed.y)).y
+#					floorvel = get_collider_velocity()
+#					get_node("normallabel").set_text(str(airtime))
+#					get_node("Label").set_text(str(presstime))
+#					rest = normal.slide(rest)
+#					velocity = normal.slide(velocity)
+#					move(rest)
+#				if(normal == Vector2(1,0) or normal == Vector2(-1,0)):
+#					# if hit flat wall
+#					motions[n].x = 0 
+#			elif(!is_colliding() and onfloor == true):
+#				onfloor = false
+			motions[n].x -= motions[n].y
+		var finished = null
+		for n in motions:
+			if n.x <= 20 and n.x >= -20:
+				finished = n
+		if finished != null:
+			motions.remove(motions.find(finished))
+func add_horizontal_motion(var motion):
+	motions.append(motion)
+

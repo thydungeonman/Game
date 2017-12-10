@@ -14,3 +14,4 @@ func _fixed_process(delta):
 		for i in get_overlapping_bodies():
 			if(i.is_in_group("enemy")):
 				i.take_damage(5)
+				i.add_horizontal_motion(Vector2(80,5)* get_parent().input_direction)

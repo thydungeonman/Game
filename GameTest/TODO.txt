@@ -20,3 +20,14 @@ shooting and moving,
 reactionary - similar to zelda2 knights,
 jumping,
 flying,
+
+Environment tiles to make:
+
+Regular ones,
+destructable ones,
+invisible ones,
+ones that are invisible until you get close,
+moving ones - not a tile though,
+
+
+
