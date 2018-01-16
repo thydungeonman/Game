@@ -13,7 +13,7 @@ var speed = Vector2()
 var velocity = Vector2()
 const SLIDE_STOP_VELOCITY = 1.0 # One pixel per second
 const SLIDE_STOP_MIN_TRAVEL = 1.0 # One pixel
-export(int) var MAX_SPEED = 200
+export(int) var MAX_SPEED = 170
 export(int) var ACCELERATION = 1700
 export(int) var DECELERATION = 2000
 export(int) var LOW_JUMP_FORCE = 350
@@ -246,6 +246,9 @@ func HandleMovement(delta):
 			floorvel = get_collider_velocity()
 			get_node("normallabel").set_text(str(airtime))
 			get_node("Label").set_text(str(presstime))
+		if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE and get_collider().is_in_group("button")):
+			get_collider().anim.play("closed")
+			#trigger button events
 		if(speed.x == 0 and get_travel().length() < SLIDE_STOP_MIN_TRAVEL and velocity.x < SLIDE_STOP_VELOCITY and get_collider_velocity() == Vector2()):
 			#if is on slanted floor and would have slid down by 1 pixel
 			revert_motion()

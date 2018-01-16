@@ -10,7 +10,7 @@
 custom_solver_bias = 0.0
 extents = Vector2( 8, 10 )
 
-[sub_resource type="Animation" id=3]
+[sub_resource type="Animation" id=2]
 
 length = 0.4
 loop = false
@@ -38,7 +38,7 @@ tracks/1/keys = {
 } ]
 }
 
-[sub_resource type="Animation" id=4]
+[sub_resource type="Animation" id=3]
 
 length = 0.01
 loop = false
@@ -64,9 +64,8 @@ tracks/1/keys = {
 "values": [ false ]
 }
 
-[sub_resource type="Animation" id=2]
+[sub_resource type="Animation" id=4]
 
-resource/name = "stunned"
 length = 0.5
 loop = false
 step = 0.1
@@ -123,7 +122,7 @@ _update_shape_index = 0
 
 [node name="downleft" type="RayCast2D" parent="."]
 
-transform/pos = Vector2( -10, -5 )
+transform/pos = Vector2( -8, -5 )
 enabled = true
 cast_to = Vector2( 0, 18 )
 layer_mask = 1
@@ -131,7 +130,7 @@ type_mask = 15
 
 [node name="downright" type="RayCast2D" parent="."]
 
-transform/pos = Vector2( 10, -5 )
+transform/pos = Vector2( 8, -5 )
 enabled = true
 cast_to = Vector2( 0, 18 )
 layer_mask = 1
@@ -139,9 +138,9 @@ type_mask = 15
 
 [node name="forward" type="RayCast2D" parent="."]
 
-transform/pos = Vector2( 10, 3 )
+transform/pos = Vector2( 8, 3 )
 enabled = true
-cast_to = Vector2( 5, 0 )
+cast_to = Vector2( 1, 0 )
 layer_mask = 1
 type_mask = 15
 
@@ -150,9 +149,9 @@ type_mask = 15
 playback/process_mode = 1
 playback/default_blend_time = 0.0
 root/root = NodePath("..")
-anims/death = SubResource( 3 )
-anims/restpose = SubResource( 4 )
-anims/stunned = SubResource( 2 )
+anims/death = SubResource( 2 )
+anims/restpose = SubResource( 3 )
+anims/stunned = SubResource( 4 )
 anims/walk = SubResource( 5 )
 playback/active = true
 playback/speed = 1.0
@@ -161,9 +160,9 @@ autoplay = ""
 
 [node name="back" type="RayCast2D" parent="."]
 
-transform/pos = Vector2( -10, 3 )
+transform/pos = Vector2( -8, 3 )
 enabled = true
-cast_to = Vector2( -5, 0 )
+cast_to = Vector2( -1, 0 )
 layer_mask = 1
 type_mask = 15
 

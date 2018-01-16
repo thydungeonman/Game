@@ -7,11 +7,13 @@ func _ready():
 
 func _fixed_process(delta):
 	count += delta
-	print("punch")
 	if(count > punchtime):
 		self.queue_free()
 	if(self.get_overlapping_bodies().size() > 0):
 		for i in get_overlapping_bodies():
 			if(i.is_in_group("enemy")):
 				i.take_damage(5)
-				i.add_horizontal_motion(Vector2(80,5)* get_parent().input_direction)
+				i.add_horizontal_motion(Vector2(200,15)* get_parent().input_direction)
+			elif(i.is_in_group("stationary enemy")):
+				i.take_damage(5)
+		self.queue_free()

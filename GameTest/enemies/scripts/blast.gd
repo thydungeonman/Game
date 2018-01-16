@@ -16,7 +16,7 @@ func _fixed_process(delta):
 		var collider = get_collider()
 		if(collider.is_in_group("wall") or collider.is_in_group("projectile")):
 			queue_free()
-		elif(collider.is_in_group("enemy")):
+		elif(collider.is_in_group("enemy")or collider.is_in_group("stationary enemy")):
 			collider.take_damage(1)
 			queue_free()
 		elif(collider.is_in_group("player")):
@@ -30,6 +30,6 @@ func knock_player(var player, var direction = 1):
 	if(player.invincounter > player.invintime):
 		var alteredknockbackforce = knockbackforce * direction
 		player.add_horizontal_motion(alteredknockbackforce)
-		player.add_vertical_motion(-200)
+		player.add_vertical_motion(Vector2(-200,-8))
 		player.take_damage(1)
 		player.invincounter = 0.0

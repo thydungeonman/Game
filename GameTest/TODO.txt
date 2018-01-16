@@ -11,6 +11,8 @@ If an enemy can't give damage then it shouldn't knock the player back.
 
 try making punch and kick bigger and adding a bit of forward motion with them to see how it feels
 
+make elbows more obvious in player idle animation
+
 Enemies to make:
 
 motionless hazards,

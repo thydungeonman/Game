@@ -1,8 +1,8 @@
 extends KinematicBody2D
 
 #ENEMY VARIABLES
-var health = 30
-var speed = Vector2(15,0)
+var health = 7
+var speed = Vector2(10,0)
 var damagetaketimer= 0.0
 var damagetaketime = .1
 var cantakedamage = false
@@ -16,6 +16,8 @@ var state = 1 #0 = dead 1 = walking 2 = stun # make enum some day
 var motions = []
 var stuncounter = 0.0
 var stuncount = .5
+
+var dontmove = false
 
 onready var left = get_node("downleft")
 onready var right = get_node("downright")
@@ -123,6 +125,12 @@ func alternate_motion(var delta):
 		#print(str(motions[0]))
 		for n in range(motions.size()):
 			var rest = move(Vector2(motions[n].x,0) * delta)
+			print(str(motions[n]) + " " + str(n))
+			if((not left.is_colliding()) or (not right.is_colliding())):
+				print("notcolliding")
+				revert_motion()
+				dontmove = true
+				#print("reverted enemy motion")
 #			if(is_colliding()):
 #				var floorvel = Vector2()
 #				var normal = get_collision_normal()
@@ -151,6 +159,9 @@ func alternate_motion(var delta):
 				finished = n
 		if finished != null:
 			motions.remove(motions.find(finished))
+		if dontmove == true:
+			dontmove = false
+			motions.clear()
 func add_horizontal_motion(var motion):
 	motions.append(motion)
 

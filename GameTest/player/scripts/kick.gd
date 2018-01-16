@@ -13,3 +13,4 @@ func _fixed_process(delta):
 		for i in get_overlapping_bodies():
 			if(i.is_in_group("enemy")):
 				i.take_damage(1)
+		self.queue_free()

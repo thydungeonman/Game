@@ -15,7 +15,7 @@ func _fixed_process(delta):
 			if(i.is_in_group("enemy")):
 				queue_free()
 			elif(i.is_in_group("projectile") and not beendeflected):
-				i.speed += Vector2(300,100)
+				i.speed += Vector2(200,100)
 				if(Input.is_action_pressed("ui_up")):
 					i.speed.y += 200
 					i.speed = i.speed * i.speed.normalized()
