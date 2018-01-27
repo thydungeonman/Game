@@ -20,11 +20,11 @@ func _fixed_process(delta):
 		if(shoottimer > shoottime):
 			shoottimer = 0.0
 			var shot = preload("res://enemies/scenes/blast.tscn").instance()
+			shot.facingright = facingright
 			add_child(shot)
 			shot.set_pos(Vector2(20,0))
 			if(!facingright):
 				shot.set_pos(Vector2(-20,0))
-			shot.facingright = facingright
 			#instantiate shot in the correct direction
 			#false being left and true being right
 	else:

@@ -6,5 +6,6 @@ func _ready():
 	# Initialization here
 	pass
 
-func open():
+
+func _on_button_Pressed():
 	anim.play("opening")

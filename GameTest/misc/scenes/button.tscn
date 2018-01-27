@@ -57,14 +57,14 @@ tracks/3/keys = {
 }
 tracks/4/type = "method"
 tracks/4/path = NodePath(".")
-tracks/4/interp = 0
+tracks/4/interp = 1
 tracks/4/imported = false
 tracks/4/keys = {
 "times": FloatArray( 0 ),
 "transitions": FloatArray( 1 ),
 "values": [ {
 "args": [  ],
-"method": "opendoor"
+"method": "activate"
 } ]
 }
 

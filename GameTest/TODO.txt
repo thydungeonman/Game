@@ -5,6 +5,7 @@ TODO LIST:
 	clean up game directory
 	talking - things you can walk up to and see what they say
 	
+Make a trigger area that connects to a viewport so the camera can stop moving when a player is a a certain spot
 
 sort out the knock player and give damage functions. it should be either both at once or neither.
 If an enemy can't give damage then it shouldn't knock the player back.

@@ -38,6 +38,7 @@ var presstime= 0.0
 var invincounter = 0.0  
 var invintime = 1.5 # make sure this is synced up with the blink time
 var damageblinktimer = 5 #this is high so the player doesnt start blinking
+var damageblinking = false
 #duck variable
 var ducking = false
 #Attack variables
@@ -68,7 +69,8 @@ var right = false
 var left = false
 var up = false
 var B = false
-var value = 0.0
+var taptimer = 0.0
+var taptime = .175
 
 onready var inplabel = get_node("inputlabel")
 onready var molabel = get_node("motionlabel")
@@ -111,26 +113,27 @@ func _fixed_process(delta):
 
 
 func handle_input_buffer(delta):
-	inputtimer += delta
+#	inputtimer += delta
 	sincelastinput += delta
 #	if inputtimer > 0.4:
 #		if inputbuffer.size() > 0:
 #			inputbuffer.pop_front()
 #			inputtimer = 0.0
+	#CHECKING BUFFER FOR PROPER INPUTS AND THEN ADDING EFFECT
 	if inputbuffer.size() >= 2:
-		if inputbuffer[inputbuffer.size() - 1] == "right" and inputbuffer[inputbuffer.size() - 2] == "right" and value < .2:
+		if inputbuffer[inputbuffer.size() - 1] == "right" and inputbuffer[inputbuffer.size() - 2] == "right" and taptimer < taptime:
 			add_horizontal_motion(Vector2(400,20))
 			inputbuffer.clear()
-		elif inputbuffer[inputbuffer.size() - 1] == "left" and inputbuffer[inputbuffer.size() - 2] == "left" and value < .2:
+		elif inputbuffer[inputbuffer.size() - 1] == "left" and inputbuffer[inputbuffer.size() - 2] == "left" and taptimer < taptime:
 			add_horizontal_motion(Vector2(-400,-20))
 			inputbuffer.clear()
-	inplabel.set_text("")
-	for x in inputbuffer:
-		inplabel.set_text(inplabel.get_text() + str(x) + "\n" )
+#	inplabel.set_text("")
+#	for x in inputbuffer:
+#		inplabel.set_text(inplabel.get_text() + str(x) + "\n" )
 	if Input.is_action_pressed("ui_right"):
 		if !right:
 			inputbuffer.append("right")
-			value = sincelastinput
+			taptimer = sincelastinput
 			sincelastinput = 0.0
 		right = true
 	else:
@@ -138,7 +141,7 @@ func handle_input_buffer(delta):
 	if Input.is_action_pressed("ui_left"):
 		if !left:
 			inputbuffer.append("left")
-			value = sincelastinput
+			taptimer = sincelastinput
 			sincelastinput = 0.0
 		left = true
 	else:
@@ -146,7 +149,7 @@ func handle_input_buffer(delta):
 	if Input.is_action_pressed("ui_attack"):
 		if !B:
 			inputbuffer.append("attack")
-			value = sincelastinput
+			taptimer = sincelastinput
 			sincelastinput = 0.0
 		B = true
 	else:
@@ -154,7 +157,7 @@ func handle_input_buffer(delta):
 	if Input.is_action_pressed("ui_duck"):
 		if !down:
 			inputbuffer.append("down")
-			value = sincelastinput
+			taptimer = sincelastinput
 			sincelastinput = 0.0
 		down = true
 	else:
@@ -228,7 +231,8 @@ func HandleMovement(delta):
 	if(is_colliding()):
 		if((get_collider().is_in_group("enemy") and get_collider().state != 2) or get_collider().is_in_group("projectile") and invincounter > invintime):
 			#if touched enemy
-			damageblinktimer = 0.0
+			if damageblinking != true:
+				damageblinktimer = 0.0
 			print("player touch enemy")
 			get_collider().knock_player(self,-input_direction)
 			#anim.play("invincible")
@@ -391,9 +395,12 @@ func add_vertical_motion(var motion):
 func damage_blink(delta):
 	damageblinktimer += delta
 	if(damageblinktimer < 1.5):
+		damageblinking = true
 		if((fmod(damageblinktimer,.33)) > .17):
 			player_sprite.hide()
 		else:
 			player_sprite.show()
+	else:
+		damageblinking = false
 
 

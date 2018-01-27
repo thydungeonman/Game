@@ -58,7 +58,9 @@ tracks/1/keys = {
 "values": [ ExtResource( 2 ), ExtResource( 3 ), ExtResource( 4 ), ExtResource( 5 ), ExtResource( 6 ) ]
 }
 
-[node name="door" type="KinematicBody2D"]
+[node name="door" type="KinematicBody2D" groups=[
+"door",
+]]
 
 input/pickable = false
 shapes/0/shape = SubResource( 1 )

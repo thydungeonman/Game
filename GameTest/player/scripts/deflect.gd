@@ -15,17 +15,21 @@ func _fixed_process(delta):
 			if(i.is_in_group("enemy")):
 				queue_free()
 			elif(i.is_in_group("projectile") and not beendeflected):
-				i.speed += Vector2(200,100)
+				var shotdirection = i.speed.x / abs(i.speed.x) #-1 for going left
+				i.speed = Vector2(300,100) 
 				if(Input.is_action_pressed("ui_up")):
-					i.speed.y += 200
+					i.speed.y += 150
 					i.speed = i.speed * i.speed.normalized()
 					i.speed.y *= -1
+				elif(Input.is_action_pressed("ui_duck")):
+					i.speed.y += 150
+					i.speed = i.speed * i.speed.normalized()
 				else:
 					i.speed = i.speed * i.speed.normalized()
 					randomize()
 					if(randi() % 2 == 1):
 						i.speed.y *= -1
-				i.speed.x *= -1
+				i.speed.x *= -shotdirection #reflect its original direction
 				print(str(i.speed))
 				beendeflected = true
 				get_parent().deflectbreakcounter = 0.2
