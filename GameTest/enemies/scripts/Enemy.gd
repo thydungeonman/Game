@@ -33,7 +33,7 @@ func _ready():
 	animator.play("walk")
 
 func _fixed_process(delta):
-	healthlabel.set_text(str(health))
+	healthlabel.set_text("Health: " + str(health))
 	alternate_motion(delta)
 	damagegivetimer += delta
 	damagetaketimer += delta
@@ -115,7 +115,7 @@ func knock_player(var player, var direction = 1):
 		var alteredknockbackforce = knockbackforce * direction
 		player.add_horizontal_motion(alteredknockbackforce)
 		player.add_vertical_motion(Vector2(-200,-8))
-		player.take_damage(1)
+		player.take_damage(3)
 		damagegivetimer = 0.0
 		cangivedamage = false
 		player.invincounter = 0.0

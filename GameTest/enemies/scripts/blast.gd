@@ -1,5 +1,5 @@
 extends KinematicBody2D
-var speed = Vector2(100,0)
+var trajectory = Vector2(100,0)
 var facingright = true
 var direction = 1
 
@@ -7,14 +7,14 @@ var knockbackforce = Vector2(200,10)
 func _ready():
 	set_fixed_process(true)
 	if(!facingright):
-		speed.x = -speed.x
+		trajectory.x = -trajectory.x
 
 func _fixed_process(delta):
 #	if(facingright):
 #		move(speed * delta)
 #	else:
 #		move(-speed * delta)
-	move(speed * delta)
+	move(trajectory * delta)
 	if(is_colliding()):
 		var collider = get_collider()
 		if(collider.is_in_group("wall") or collider.is_in_group("projectile") or collider.is_in_group("door")):

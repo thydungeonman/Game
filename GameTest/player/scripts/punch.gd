@@ -16,4 +16,5 @@ func _fixed_process(delta):
 				i.add_horizontal_motion(Vector2(200,15)* get_parent().input_direction)
 			elif(i.is_in_group("stationary enemy")):
 				i.take_damage(5)
+		get_parent().health += 1
 		self.queue_free()

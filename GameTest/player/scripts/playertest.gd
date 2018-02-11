@@ -87,11 +87,12 @@ func _input(event):
 func _process(delta):
 	#INPUTS and direction
 	GetInputs(delta)
-
+	
 
 
 func _fixed_process(delta):
-	get_node("label").set_text(str(airtime))
+	#get_node("label").set_text(str(airtime))
+	get_node("label").set_text("Health: " + str(health))
 	#ALTERNATE MOTIONS
 	alternate_motion(delta)
 	alternate_vertical_motion(delta)
