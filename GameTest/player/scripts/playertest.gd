@@ -29,6 +29,8 @@ var max_jump_count = 1
 var airtime = 0.0
 var onfloor = false
 var jumping = false
+var bunnyhopstopper = false
+var bunnyhopstopperpart2 = false
 #sprite for flipping
 onready var player_sprite = get_node("Sprite")
 onready var anim = get_node("AnimationPlayer")
@@ -207,11 +209,14 @@ func GetInputs(delta):
 	if(Input.is_action_pressed("ui_jump")):
 		jumppresstime += delta
 		presstime+= delta
+		bunnyhopstopper = true
 	else:
 		jumppresstime = 0.0
+		bunnyhopstopper = false
 
 func HandleMovement(delta):
-	Jump(delta)
+	if(bunnyhopstopperpart2 == false):
+		Jump(delta)
 	#HORIZONAL MOVEMENT
 	if(input_direction == - direction):
 		speed.x = 0
@@ -242,9 +247,14 @@ func HandleMovement(delta):
 		var normal = get_collision_normal()
 		if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE):
 			#if touched floor or floor with tolerated angle
+			#if holding the jump button right as touching
+			#the ground from a jump
+			if(jumping and bunnyhopstopper):
+				bunnyhopstopperpart2 = true
+			else: 
+				bunnyhopstopperpart2 = false
 			onfloor = true
 			airtime = 0.0
-			jumping = false
 			jumppresstime = 0.0
 			jump_count = 0
 			speed.y = normal.slide(Vector2(0,speed.y)).y
@@ -265,6 +275,9 @@ func HandleMovement(delta):
 		if(normal == Vector2(1,0) or normal == Vector2(-1,0)):
 			# if hit flat wall
 			speed.x = 0
+		if(normal == Vector2(0,1)):
+			#if hit roof
+			speed.y = 0
 		if(floorvel != Vector2()):
 			#if floor is not stationary
 			move(floorvel * delta)
@@ -277,6 +290,7 @@ func HandleMovement(delta):
 func Jump(delta):
 	if(Input.is_action_pressed("ui_jump")):
 	#if pressed jump button and havent jumped more times than allowed and on the floor
+	
 		if((onfloor or airtime <.05) and jump_count < max_jump_count and jumppresstime < .035):
 			presstime= 0
 			airtime = 0.0
@@ -284,10 +298,10 @@ func Jump(delta):
 			jumping = true
 			lowjump = true
 			jump_count += 1
-		onfloor = false
-		if(jumppresstime > .06 and airtime < .16 and jumping and lowjump):
+		elif(jumppresstime > .06 and airtime < .16 and jumping and lowjump):
 			speed.y += -JUMP_FORCE
 			lowjump = false
+		onfloor = false
 
 func handle_attack(var delta):
 	attackbreakcounter += delta
