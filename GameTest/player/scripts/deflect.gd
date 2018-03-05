@@ -2,6 +2,7 @@ extends Area2D
 var count = 0.0
 var deflecttime = 0.1
 var beendeflected = false
+onready var player = get_parent()
 
 func _ready():
 	set_fixed_process(true)
@@ -14,7 +15,14 @@ func _fixed_process(delta):
 		for i in get_overlapping_bodies():
 			if(i.is_in_group("enemy")):
 				queue_free()
+				player.deflectbreakcounter = .6
+			elif(i.is_in_group("flying enemy")):
+				i.state = 2 #stunned
+				player.deflectbreakcounter = .6
 			elif(i.is_in_group("projectile") and not beendeflected):
+				print("projectile deflected")
+				i.remove_collision_exception_with(i.get_parent())
+				player.deflectbreakcounter = .4
 				var shotdirection = i.trajectory.x / abs(i.trajectory.x) #-1 for going left
 				i.trajectory = Vector2(300,100) 
 				if(Input.is_action_pressed("ui_up")):
@@ -32,7 +40,6 @@ func _fixed_process(delta):
 				i.trajectory.x *= -shotdirection #reflect its original direction
 				print(str(i.trajectory))
 				beendeflected = true
-				get_parent().deflectbreakcounter = 0.2
 				queue_free()
 				 #deflect projectile in either random opposite direction
 					# or stun enemy

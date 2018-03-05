@@ -2,7 +2,6 @@ extends KinematicBody2D
 #test script for player input and movement
 #as inelegant as it is, most things work around resetting timers
 #try to find a better solution - state machine maybe
-#TODO separate add_vertical_motion from jump variables
 
 #movement variables
 var direction = 0
@@ -13,14 +12,15 @@ var speed = Vector2()
 var velocity = Vector2()
 const SLIDE_STOP_VELOCITY = 1.0 # One pixel per second
 const SLIDE_STOP_MIN_TRAVEL = 1.0 # One pixel
-export(int) var MAX_SPEED = 170
+export(int) var MAX_SPEED = 150
 export(int) var ACCELERATION = 1700
 export(int) var DECELERATION = 2000
 export(int) var LOW_JUMP_FORCE = 350
 export(int) var JUMP_FORCE = 150
-export(int) var GRAVITY = 1400
+export(int) var GRAVITY = 1800 #1800
 export(float) var FLOOR_ANGLE_TOLERANCE = 40.0
 #jumping variables
+var shortjumpslowdownlockout = false
 var jump_count = 0
 var lowjump = false
 var jumppresstime = 0.0
@@ -31,6 +31,9 @@ var onfloor = false
 var jumping = false
 var bunnyhopstopper = false
 var bunnyhopstopperpart2 = false
+var newjumpforce = 0
+export(float) var newjumpforcefull = 120
+var hithead = false
 #sprite for flipping
 onready var player_sprite = get_node("Sprite")
 onready var anim = get_node("AnimationPlayer")
@@ -73,6 +76,18 @@ var up = false
 var B = false
 var taptimer = 0.0
 var taptime = .175
+#viewport changing variables
+var makingscreenbigger = false
+var makingscreensmaller = false
+#Gravity changing variables
+var defaultgravityvalue = 1800
+var timepicked = 0.0
+var gravitytimer = 0.0
+var changedgravity = false
+#input polling variables
+var inputtimepicked = 0.0
+var pollinginput = true
+var inputcancelingtimer = 0.0
 
 onready var inplabel = get_node("inputlabel")
 onready var molabel = get_node("motionlabel")
@@ -88,13 +103,18 @@ func _input(event):
 
 func _process(delta):
 	#INPUTS and direction
-	GetInputs(delta)
+	if pollinginput:
+		GetInputs(delta)
+	
+	InputCancelBack(delta)
 	
 
 
 func _fixed_process(delta):
 	#get_node("label").set_text(str(airtime))
 	get_node("label").set_text("Health: " + str(health))
+	#GRAVITY
+	GravityChange(delta)
 	#ALTERNATE MOTIONS
 	alternate_motion(delta)
 	alternate_vertical_motion(delta)
@@ -113,9 +133,39 @@ func _fixed_process(delta):
 	get_node("invinlabel").set_text(str(invincounter))
 	damage_blink(delta)
 
+func GravityChange(delta):
+	if changedgravity:
+		gravitytimer += delta
+		if gravitytimer >= timepicked:
+			GRAVITY = defaultgravityvalue
+			changedgravity = false
+			gravitytimer = 0.0
+			timepicked = 0.0
 
+func GravityFront(var time):
+	if !changedgravity:
+		timepicked = time
+		changedgravity = true
+		GRAVITY = 0
+
+func InputCancelFront(var time):
+	if pollinginput:
+		inputtimepicked = time
+		direction = 0
+		pollinginput = false
+
+func InputCancelBack(delta):
+	if!pollinginput:
+		inputcancelingtimer += delta
+		if inputcancelingtimer >= inputtimepicked:
+			inputcancelingtimer = 0.0
+			inputtimepicked = 0.0
+			pollinginput = true
 
 func handle_input_buffer(delta):
+	#TODO FIX BUG 
+	#the time between the first and second imput of a three input combo doesn't matter
+	#TODO maybe add a gap between combos being able to be excecuted so a player can't dash almost forever
 #	inputtimer += delta
 	sincelastinput += delta
 #	if inputtimer > 0.4:
@@ -127,50 +177,94 @@ func handle_input_buffer(delta):
 		if inputbuffer[inputbuffer.size() - 1] == "right" and inputbuffer[inputbuffer.size() - 2] == "right" and taptimer < taptime:
 			add_horizontal_motion(Vector2(400,20))
 			inputbuffer.clear()
+			GravityFront(.3)
+			speed.y = 0
+			speed.x = 0
+			onfloor = false
 		elif inputbuffer[inputbuffer.size() - 1] == "left" and inputbuffer[inputbuffer.size() - 2] == "left" and taptimer < taptime:
 			add_horizontal_motion(Vector2(-400,-20))
 			inputbuffer.clear()
-#	inplabel.set_text("")
-#	for x in inputbuffer:
-#		inplabel.set_text(inplabel.get_text() + str(x) + "\n" )
-	if Input.is_action_pressed("ui_right"):
-		if !right:
-			inputbuffer.append("right")
-			taptimer = sincelastinput
-			sincelastinput = 0.0
-		right = true
-	else:
-		right = false
-	if Input.is_action_pressed("ui_left"):
-		if !left:
-			inputbuffer.append("left")
-			taptimer = sincelastinput
-			sincelastinput = 0.0
-		left = true
-	else:
-		left = false
-	if Input.is_action_pressed("ui_attack"):
-		if !B:
-			inputbuffer.append("attack")
-			taptimer = sincelastinput
-			sincelastinput = 0.0
-		B = true
-	else:
-		B = false
-	if Input.is_action_pressed("ui_duck"):
-		if !down:
-			inputbuffer.append("down")
-			taptimer = sincelastinput
-			sincelastinput = 0.0
-		down = true
-	else:
-		down = false
-	
+			GravityFront(.3)
+			onfloor = false
+			speed.y = 0
+			speed.x = 0
+		elif inputbuffer[inputbuffer.size() - 3] == "down" and inputbuffer[inputbuffer.size() - 2] == "up" and inputbuffer[inputbuffer.size() - 1] == "attack" and taptimer < taptime:
+			print("SUPER ATTACK")
+			inputbuffer.clear()
+	inplabel.set_text("")
+	for x in inputbuffer:
+		inplabel.set_text(inplabel.get_text() + str(x) + "\n" )
+	if pollinginput:
+		if Input.is_action_pressed("ui_right"):
+			if !right:
+				inputbuffer.append("right")
+				taptimer = sincelastinput
+				sincelastinput = 0.0
+			right = true
+		else:
+			right = false
+		if Input.is_action_pressed("ui_left"):
+			if !left:
+				inputbuffer.append("left")
+				taptimer = sincelastinput
+				sincelastinput = 0.0
+			left = true
+		else:
+			left = false
+		if Input.is_action_pressed("ui_attack"):
+			if !B:
+				inputbuffer.append("attack")
+				taptimer = sincelastinput
+				sincelastinput = 0.0
+			B = true
+		else:
+			B = false
+		if Input.is_action_pressed("ui_duck"):
+			if !down:
+				inputbuffer.append("down")
+				taptimer = sincelastinput
+				sincelastinput = 0.0
+			down = true
+		else:
+			down = false
+		if Input.is_action_pressed("ui_up"):
+			if !up:
+				inputbuffer.append("up")
+				taptimer = sincelastinput
+				sincelastinput = 0.0
+			up = true
+		else:
+			up = false
 
 func GetInputs(delta):
-	canmovetimer += delta
-	if canmovetimer >= canmovetime:
-		canmovetimer = 10 #just incase theres a problem with this rising forever
+	if Input.is_action_pressed("ui_quit"):
+		get_tree().quit()
+	
+	if Input.is_action_pressed("ui_page_up"):
+		if !makingscreenbigger:
+			var rect = get_viewport().get_rect()
+			if rect.size.x < 1000:
+				rect.size *= 1.25
+			print(rect.size)
+			get_viewport().set_rect(rect)
+			makingscreenbigger = true
+	else:
+		makingscreenbigger = false
+	if Input.is_action_pressed("ui_page_down"):
+		if !makingscreensmaller:
+			var rect = get_viewport().get_rect()
+			if rect.size.x > 430:
+				rect.size /= 1.25
+			print(rect.size)
+			get_viewport().set_rect(rect)
+			makingscreensmaller = true
+	else:
+		makingscreensmaller = false
+	
+	if Input.is_action_pressed("ui_select"):
+		get_tree().reload_current_scene()
+	#movement controls onward
+	if pollinginput:
 		attack = Input.is_action_pressed("ui_attack")
 		deflect = Input.is_action_pressed("ui_deflect")
 		if(direction):
@@ -211,8 +305,9 @@ func GetInputs(delta):
 		presstime+= delta
 		bunnyhopstopper = true
 	else:
-		jumppresstime = 0.0
 		bunnyhopstopper = false
+		if(onfloor == false):
+			lowjump = false
 
 func HandleMovement(delta):
 	if(bunnyhopstopperpart2 == false):
@@ -226,6 +321,7 @@ func HandleMovement(delta):
 		speed.x -= DECELERATION * delta
 	
 	speed.x = clamp(speed.x,0,MAX_SPEED)
+	speed.y = clamp(speed.y, -500,400)
 	velocity.x = speed.x * input_direction * delta
 	speed.y += GRAVITY * delta
 	velocity.y = speed.y * delta
@@ -253,10 +349,13 @@ func HandleMovement(delta):
 				bunnyhopstopperpart2 = true
 			else: 
 				bunnyhopstopperpart2 = false
+				jumping = false
 			onfloor = true
+			newjumpforce = newjumpforcefull
 			airtime = 0.0
 			jumppresstime = 0.0
 			jump_count = 0
+			hithead = false
 			speed.y = normal.slide(Vector2(0,speed.y)).y
 			floorvel = get_collider_velocity()
 			get_node("normallabel").set_text(str(airtime))
@@ -278,6 +377,7 @@ func HandleMovement(delta):
 		if(normal == Vector2(0,1)):
 			#if hit roof
 			speed.y = 0
+			hithead = true
 		if(floorvel != Vector2()):
 			#if floor is not stationary
 			move(floorvel * delta)
@@ -289,19 +389,40 @@ func HandleMovement(delta):
 
 func Jump(delta):
 	if(Input.is_action_pressed("ui_jump")):
+		if onfloor:
+			shortjumpslowdownlockout = true
 	#if pressed jump button and havent jumped more times than allowed and on the floor
 	
-		if((onfloor or airtime <.05) and jump_count < max_jump_count and jumppresstime < .035):
+#		if((onfloor or airtime <.05) and jump_count < max_jump_count and jumppresstime < .035):
+#			presstime= 0
+#			airtime = 0.0
+#			speed.y = -LOW_JUMP_FORCE
+#			jumping = true
+#			lowjump = true
+#			jump_count += 1
+#		elif(jumppresstime > .06 and airtime < .16 and jumping and lowjump):
+#			speed.y += -JUMP_FORCE
+#			lowjump = false
+		if((onfloor or (airtime < .013 and jumping == false)) and pollinginput):
+#			print(jumping)
 			presstime= 0
 			airtime = 0.0
-			speed.y = -LOW_JUMP_FORCE
 			jumping = true
 			lowjump = true
-			jump_count += 1
-		elif(jumppresstime > .06 and airtime < .16 and jumping and lowjump):
-			speed.y += -JUMP_FORCE
-			lowjump = false
+			speed.y += -150
+		if(lowjump and jumppresstime < .185 and bunnyhopstopper):
+			speed.y += -newjumpforce
+			newjumpforce -= newjumpforce/4
+			newjumpforce = clamp(newjumpforce,0,100)
+#			print(str(newjumpforce))
 		onfloor = false
+	else:
+		if shortjumpslowdownlockout == true and jumppresstime < .28 and !onfloor and hithead == false:
+			speed.y = -150
+			shortjumpslowdownlockout = false
+			#bug as a feature? time your jump release to get an additional boost
+		else:
+			shortjumpslowdownlockout = false
 
 func handle_attack(var delta):
 	attackbreakcounter += delta
@@ -322,6 +443,7 @@ func handle_attack(var delta):
 
 func handle_delfect(var delta):
 	deflectbreakcounter += delta
+#	print(deflectbreakcounter)
 	if(deflect and not deflecting and not attacking and deflectbreakcounter > deflectbreak):
 		deflectbreakcounter = 0.0
 		var deflect = preload("res://player/scenes/deflect.tscn").instance()
@@ -329,7 +451,7 @@ func handle_delfect(var delta):
 		deflect.set_pos(Vector2(input_direction * 15,0))
 
 func take_damage(var damage):
-	canmovetimer = 0.0
+	InputCancelFront(1.0)
 	damageblinktimer = 0.0
 	get_node("label").set_text(str(health))
 	attackbreakcounter = 0.0

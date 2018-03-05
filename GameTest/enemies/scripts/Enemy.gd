@@ -16,7 +16,7 @@ var state = 1 #0 = dead 1 = walking 2 = stun # make enum some day
 var motions = []
 var stuncounter = 0.0
 var stuncount = .5
-
+var damage = 3
 var dontmove = false
 
 onready var left = get_node("downleft")
@@ -99,7 +99,7 @@ func take_damage(var damage):
 		cantakedamage = false
 		damagetaketimer = 0.0
 		health -= damage
-		if(health <= 0):
+		if(health <= 0): #find better way to do this
 			cangivedamage = false
 			damagegivetimer = 0.0
 			state = 0
@@ -115,7 +115,7 @@ func knock_player(var player, var direction = 1):
 		var alteredknockbackforce = knockbackforce * direction
 		player.add_horizontal_motion(alteredknockbackforce)
 		player.add_vertical_motion(Vector2(-200,-8))
-		player.take_damage(3)
+		player.take_damage(damage)
 		damagegivetimer = 0.0
 		cangivedamage = false
 		player.invincounter = 0.0
@@ -130,28 +130,6 @@ func alternate_motion(var delta):
 				print("notcolliding")
 				revert_motion()
 				dontmove = true
-				#print("reverted enemy motion")
-#			if(is_colliding()):
-#				var floorvel = Vector2()
-#				var normal = get_collision_normal()
-#				if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE):
-#					#if touched floor or floor with tolerated angle
-#					onfloor = true
-#					jumping = false
-#					jumppresstime = 0.0
-#					jump_count = 0
-#					speed.y = normal.slide(Vector2(0,speed.y)).y
-#					floorvel = get_collider_velocity()
-#					get_node("normallabel").set_text(str(airtime))
-#					get_node("Label").set_text(str(presstime))
-#					rest = normal.slide(rest)
-#					velocity = normal.slide(velocity)
-#					move(rest)
-#				if(normal == Vector2(1,0) or normal == Vector2(-1,0)):
-#					# if hit flat wall
-#					motions[n].x = 0 
-#			elif(!is_colliding() and onfloor == true):
-#				onfloor = false
 			motions[n].x -= motions[n].y
 		var finished = null
 		for n in motions:

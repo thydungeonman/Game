@@ -1,6 +1,7 @@
 extends Area2D
 var kicktime = 0.1
 var count = 0.0
+onready var player = get_parent()
 
 func _ready():
 	set_fixed_process(true)
@@ -13,4 +14,8 @@ func _fixed_process(delta):
 		for i in get_overlapping_bodies():
 			if(i.is_in_group("enemy")):
 				i.take_damage(1)
+				i.add_horizontal_motion(Vector2(50,1) * player.input_direction)
+			if(i.is_in_group("flying enemy")):
+				i.take_damage(2)
+				i.add_horizontal_motion(Vector2(50,1) * player.input_direction)
 		self.queue_free()
