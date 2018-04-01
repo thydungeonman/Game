@@ -4,7 +4,6 @@ var facingright = true
 var direction = 1
 var heldenemy = false
 var parentspeed = Vector2()
-var creatornode = KinematicBody2D
 #TODO
 #Create thrown enemy class with kinematic body but with NO collision shape
 #engine bug appears where inherited collisionshape nodes ignore changes and stick to base settings
@@ -18,6 +17,7 @@ func _ready():
 		trajectory.x = -trajectory.x
 
 func _fixed_process(delta):
+	print(is_colliding())
 #	if(facingright):
 #		move(speed * delta)
 #	else:

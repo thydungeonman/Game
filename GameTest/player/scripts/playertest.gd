@@ -3,6 +3,11 @@ extends KinematicBody2D
 #as inelegant as it is, most things work around resetting timers
 #try to find a better solution - state machine maybe
 
+#coding error: when doing a super attack a regular punch is still done
+#a way to solve this may be to have punches done by checking the last input
+#in the buffer, clearing it, then doing the punch
+#this way all attacks go through the buffer
+
 #movement variables
 var direction = 0
 var input_direction = 1
@@ -76,6 +81,7 @@ var up = false
 var B = false
 var taptimer = 0.0
 var taptime = .175
+var specialing = false
 #viewport changing variables
 var makingscreenbigger = false
 var makingscreensmaller = false
@@ -88,10 +94,18 @@ var changedgravity = false
 var inputtimepicked = 0.0
 var pollinginput = true
 var inputcancelingtimer = 0.0
+#grabbing variables
+var grab = false
+var grabbing = false
+var grabtime = 0.3
+var grabtimer = 0.0
+var currentlyholdingenemy = false
+var heldenemy
 
 onready var inplabel = get_node("inputlabel")
 onready var molabel = get_node("motionlabel")
 
+var superattacking = false
 
 func _ready():
 	set_fixed_process(true)
@@ -118,14 +132,16 @@ func _fixed_process(delta):
 	#ALTERNATE MOTIONS
 	alternate_motion(delta)
 	alternate_vertical_motion(delta)
+	#INPUT BUFFER FOR COMPLEX INPUTS
+	handle_input_buffer(delta)
 	#ATTACKING
 	handle_attack(delta)
 	#DEFLECTING
 	handle_delfect(delta)
+	#GRABBING
+	handle_grab(delta)
 	#HORIZONTAL MOVEMENT
 	HandleMovement(delta)
-	#INPUT BUFFER FOR COMPLEX INPUTS
-	handle_input_buffer(delta)
 	
 	molabel.set_text("")
 	for x in verticalmotions:
@@ -168,6 +184,7 @@ func handle_input_buffer(delta):
 	#TODO maybe add a gap between combos being able to be excecuted so a player can't dash almost forever
 #	inputtimer += delta
 	sincelastinput += delta
+	specialing = false
 #	if inputtimer > 0.4:
 #		if inputbuffer.size() > 0:
 #			inputbuffer.pop_front()
@@ -190,6 +207,11 @@ func handle_input_buffer(delta):
 			speed.x = 0
 		elif inputbuffer[inputbuffer.size() - 3] == "down" and inputbuffer[inputbuffer.size() - 2] == "up" and inputbuffer[inputbuffer.size() - 1] == "attack" and taptimer < taptime:
 			print("SUPER ATTACK")
+			specialing = true
+			var lightningattackrange = preload("res://player/scenes/lightningattackrange.tscn").instance()
+			lightningattackrange.first = true
+			lightningattackrange.direction = input_direction
+			add_child(lightningattackrange)
 			inputbuffer.clear()
 	inplabel.set_text("")
 	for x in inputbuffer:
@@ -261,12 +283,13 @@ func GetInputs(delta):
 	else:
 		makingscreensmaller = false
 	
-	if Input.is_action_pressed("ui_select"):
+	if Input.is_action_pressed("ui_accept"):
 		get_tree().reload_current_scene()
 	#movement controls onward
 	if pollinginput:
 		attack = Input.is_action_pressed("ui_attack")
 		deflect = Input.is_action_pressed("ui_deflect")
+		grab = Input.is_action_pressed("ui_grab")
 		if(direction):
 			input_direction = direction
 		if Input.is_action_pressed("ui_right"):
@@ -391,18 +414,6 @@ func Jump(delta):
 	if(Input.is_action_pressed("ui_jump")):
 		if onfloor:
 			shortjumpslowdownlockout = true
-	#if pressed jump button and havent jumped more times than allowed and on the floor
-	
-#		if((onfloor or airtime <.05) and jump_count < max_jump_count and jumppresstime < .035):
-#			presstime= 0
-#			airtime = 0.0
-#			speed.y = -LOW_JUMP_FORCE
-#			jumping = true
-#			lowjump = true
-#			jump_count += 1
-#		elif(jumppresstime > .06 and airtime < .16 and jumping and lowjump):
-#			speed.y += -JUMP_FORCE
-#			lowjump = false
 		if((onfloor or (airtime < .013 and jumping == false)) and pollinginput):
 #			print(jumping)
 			presstime= 0
@@ -425,15 +436,18 @@ func Jump(delta):
 			shortjumpslowdownlockout = false
 
 func handle_attack(var delta):
+	
 	attackbreakcounter += delta
 	invincounter += delta
-	if(attack and not attacking and not ducking and attackbreakcounter > attackbreak):
+	if(attack and not attacking and !deflecting and !grabbing and !currentlyholdingenemy and !ducking and attackbreakcounter > attackbreak and !specialing):
+		print("super attack: ",superattacking)
 		var attack = preload("res://player/scenes/punch.tscn").instance()
 		self.add_child(attack)
 		attack.set_pos(Vector2(input_direction * 15,0))
 		attackbreakcounter = 0.0
 		add_horizontal_motion(Vector2(100 * input_direction,10 * input_direction))
-	elif(attack and not attacking and ducking and attackbreakcounter > attackbreak):
+		inputbuffer.clear()
+	elif(attack and not attacking and !deflecting and !grabbing and ducking and attackbreakcounter > attackbreak):
 		var attack = preload("res://player/scenes/kick.tscn").instance()
 		self.add_child(attack)
 		attack.set_pos(Vector2(input_direction * 15,10))
@@ -444,11 +458,31 @@ func handle_attack(var delta):
 func handle_delfect(var delta):
 	deflectbreakcounter += delta
 #	print(deflectbreakcounter)
-	if(deflect and not deflecting and not attacking and deflectbreakcounter > deflectbreak):
+	if(deflect and not deflecting and not attacking and !grabbing and deflectbreakcounter > deflectbreak):
 		deflectbreakcounter = 0.0
 		var deflect = preload("res://player/scenes/deflect.tscn").instance()
 		self.add_child(deflect)
 		deflect.set_pos(Vector2(input_direction * 15,0))
+	deflecting = deflect
+
+func handle_grab(var delta):
+	grabtimer += delta
+	if(grab and !grabbing and !currentlyholdingenemy and !attacking and grabtimer > grabtime):
+		grabtimer = 0.0
+		var grab = preload("res://player/scenes/grab.tscn").instance()
+		self.add_child(grab)
+		grab.set_pos(Vector2(input_direction * 20,0))
+	if currentlyholdingenemy:
+#		print(get_child(11))
+		heldenemy.direction = input_direction
+		if(grab and !grabbing): #pressing button again to throw
+			heldenemy.changestate(3.5)
+			heldenemy.thrownstartingpos = get_pos()
+			remove_child(heldenemy)
+			get_parent().add_child(heldenemy)
+			currentlyholdingenemy = false
+	grabbing = grab
+
 
 func take_damage(var damage):
 	InputCancelFront(1.0)
@@ -469,27 +503,6 @@ func alternate_motion(var delta):
 		#print(str(motions[0]))
 		for n in range(motions.size()):
 			var rest = move(Vector2(motions[n].x,0) * delta)
-#			if(is_colliding()):
-#				var floorvel = Vector2()
-#				var normal = get_collision_normal()
-#				if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE):
-#					#if touched floor or floor with tolerated angle
-#					onfloor = true
-#					jumping = false
-#					jumppresstime = 0.0
-#					jump_count = 0
-#					speed.y = normal.slide(Vector2(0,speed.y)).y
-#					floorvel = get_collider_velocity()
-#					get_node("normallabel").set_text(str(airtime))
-#					get_node("Label").set_text(str(presstime))
-#					rest = normal.slide(rest)
-#					velocity = normal.slide(velocity)
-#					move(rest)
-#				if(normal == Vector2(1,0) or normal == Vector2(-1,0)):
-#					# if hit flat wall
-#					motions[n].x = 0 
-#			elif(!is_colliding() and onfloor == true):
-#				onfloor = false
 			motions[n].x -= motions[n].y
 		var finished = null
 		for n in motions:

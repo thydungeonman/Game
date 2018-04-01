@@ -1,9 +1,10 @@
-[gd_scene load_steps=9 format=1]
+[gd_scene load_steps=12 format=1]
 
 [ext_resource path="res://enemies/scripts/bat enemy.gd" type="Script" id=1]
 [ext_resource path="res://enemies/sprites/batflying1.png" type="Texture" id=2]
 [ext_resource path="res://enemies/sprites/batflying2.png" type="Texture" id=3]
 [ext_resource path="res://enemies/sprites/batswoop1.png" type="Texture" id=4]
+[ext_resource path="res://enemies/scenes/thrown enemy.tscn" type="PackedScene" id=5]
 
 [sub_resource type="RectangleShape2D" id=1]
 
@@ -42,6 +43,16 @@ tracks/0/keys = {
 "update": 1,
 "values": [ ExtResource( 2 ) ]
 }
+tracks/1/type = "value"
+tracks/1/path = NodePath("thrown/Sprite:texture")
+tracks/1/interp = 1
+tracks/1/imported = false
+tracks/1/keys = {
+"times": FloatArray( 0 ),
+"transitions": FloatArray( 1 ),
+"update": 1,
+"values": [ null ]
+}
 
 [sub_resource type="Animation" id=4]
 
@@ -59,6 +70,38 @@ tracks/0/keys = {
 "update": 1,
 "values": [ ExtResource( 4 ) ]
 }
+
+[sub_resource type="Animation" id=5]
+
+resource/name = "thrown"
+length = 0.01
+loop = false
+step = 0.1
+tracks/0/type = "value"
+tracks/0/path = NodePath("thrown/Sprite:texture")
+tracks/0/interp = 1
+tracks/0/imported = false
+tracks/0/keys = {
+"times": FloatArray( 0 ),
+"transitions": FloatArray( 1 ),
+"update": 1,
+"values": [ ExtResource( 4 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Sprite:texture")
+tracks/1/interp = 1
+tracks/1/imported = false
+tracks/1/keys = {
+"times": FloatArray( 0 ),
+"transitions": FloatArray( 1 ),
+"update": 1,
+"values": [ null ]
+}
+
+[sub_resource type="RectangleShape2D" id=6]
+
+custom_solver_bias = 0.0
+extents = Vector2( 7, 5 )
 
 [node name="bat enemy" type="KinematicBody2D" groups=[
 "flying enemy",
@@ -94,6 +137,7 @@ root/root = NodePath("..")
 anims/fly = SubResource( 2 )
 anims/rest = SubResource( 3 )
 anims/swoop = SubResource( 4 )
+anims/thrown = SubResource( 5 )
 playback/active = true
 playback/speed = 1.0
 blend_times = [  ]
@@ -113,4 +157,11 @@ percent_visible = 1.0
 lines_skipped = 0
 max_lines_visible = -1
 
+[node name="thrown" parent="." instance=ExtResource( 5 )]
 
+[node name="CollisionShape2D" parent="thrown"]
+
+shape = SubResource( 6 )
+
+
+[editable path="thrown"]

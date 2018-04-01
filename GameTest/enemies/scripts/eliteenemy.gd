@@ -1,44 +1,46 @@
 extends KinematicBody2D
+#this enemy should probably have a spiky shield or something
+# and puts his head down while charging
+
 
 #ENEMY VARIABLES
 var maxhealth = 7
 var health = 7
-var speed = Vector2(20,0)
+var speed = Vector2(80,0)
 var damagetaketimer= 0.0
 var damagetaketime = .1
 var cantakedamage = false
-var knockbackforce = Vector2(200,7)
+var knockbackforce = Vector2(300,7)
 var damagegivetimer = 0.0
 var damagegivetime = 0.25
 var cangivedamage = true
 var direction = 1
 var velocity = 0.0
-var state = 1 #0 = dead 1 = walking 2 = stun  3 = held  4 = thrown # make enum some day
+var state = 1 #0 = dead 1 = walking 2 = stun  3 = held  4 = thrown  7 = gauging distance  8 = charging # make enum some day
 var motions = []
 var stuncounter = 0.0
 var stuncount = .5
-var damage = 3
+var damage = 5
 var dontmove = false
 var thrownstartingpos = Vector2(0,0)
 var flip = false
+onready var healthlabel = get_node("healthlabel")
+
 onready var left = get_node("downleft")
 onready var right = get_node("downright")
-#onready var wallright = get_node("forward")
-#onready var wallleft = get_node("back")
 
-onready var animator = get_node("AnimationPlayer")
-onready var particles = get_node("Particles2D")
-onready var healthlabel = get_node("healthlabel")
+onready var vision = get_node("vision")
+var player = null
+
+var chargetimer = 0.0
+var chargetime = 2.0
+onready var back = get_node("back")
 
 func _ready():
 	set_fixed_process(true)
-	animator.play("restpose")
-	animator.play("walk")
-	get_node("thrown").set_collision_mask(2)
-	get_node("thrown").set_layer_mask(2)
 
 func _fixed_process(delta):
-	healthlabel.set_text(str(health))
+	healthlabel.set_text("Health: " + str(health))
 	alternate_motion(delta)
 	damagegivetimer += delta
 	damagetaketimer += delta
@@ -51,17 +53,18 @@ func _fixed_process(delta):
 		cangivedamage = true
 	else:
 		cangivedamage = false
+	if(state == 0):
+		die()
 	if(state == 1): #ALIVE
 		State1(delta)
 	elif(state == 2): #STUNNED
 		State2(delta)
-	elif(state == 3): #HELD
-		State3(delta)
-	elif(state == 3.5): #RIGHT BEFORE THROWN
-		State3_5(delta)
-	elif(state == 4): #THROWN
-		State4(delta)
-	
+	elif(state == 7): #gauging distace
+		State7(delta)
+	elif(state == 8): #charging
+		State8(delta)
+
+
 
 func State1(delta):
 	#KEEP TIME
@@ -76,7 +79,7 @@ func State1(delta):
 		velocity = speed * delta
 		move(velocity)
 		flip = !flip
-		get_node("Sprite").set_flip_h(flip)
+		set_scale(Vector2(direction,1))
 	if(!left.is_colliding()):
 #		print("collide left")
 		direction = 1
@@ -85,57 +88,91 @@ func State1(delta):
 		velocity = speed * delta
 		move(velocity)
 		flip = !flip
-		get_node("Sprite").set_flip_h(flip)
-	if(is_colliding() and (get_collider().is_in_group("enemy") or get_collider().is_in_group("wall"))):
+		set_scale(Vector2(direction,1))
+	if(is_colliding() and (get_collider().is_in_group("enemy") or (get_collider().is_in_group("eliteenemy")) or get_collider().is_in_group("wall"))):
 		direction *= -1
 		revert_motion()
 		speed.x *= -1
 		velocity = speed * delta
 		move(velocity)
 		flip = !flip
-		get_node("Sprite").set_flip_h(flip)
-	if(is_colliding() and get_collider().is_in_group("player") and cangivedamage):
-		print("enemy hit player")
-		var player = get_collider()
-		knock_player(player,direction)
+		set_scale(Vector2(direction,1))
+		
+	if(vision.get_overlapping_bodies().size() > 0):
+		for i in vision.get_overlapping_bodies():
+			if i.is_in_group("player"):
+				player = i
+				changestate(7)
+#	if(is_colliding() and get_collider().is_in_group("player") and cangivedamage):
+#		print("enemy hit player")
+#		var player = get_collider()
+#		knock_player(player,direction)
 
 func State2(delta):
 	stuncounter += delta
 	if(stuncounter > stuncount):
 		stuncounter = 0
 		state = 1
-		animator.play("walk")
-		
-func State3(delta):
-	get_node("thrown").heldenemy = true
-	if direction == -1:
-		get_node("Sprite").set_flip_h(true)
-		get_node("thrown/Sprite").set_flip_h(true)
-		get_node("thrown").trajectory = Vector2(-200,0)
-	else:
-		get_node("Sprite").set_flip_h(false)
-		get_node("thrown/Sprite").set_flip_h(false)
-		get_node("thrown").trajectory = Vector2(200,0)
+#		animator.play("walk")
 
-func State3_5(delta):
-	animator.play("thrown")
-	get_node("thrown").set_fixed_process(true)
-	set_pos(Vector2(thrownstartingpos.x + (15 * direction),thrownstartingpos.y))
-	get_node("thrown").set_collision_mask(1)
-	get_node("thrown").set_layer_mask(1)
-	set_collision_mask(2)
-	set_layer_mask(2)
-	changestate(4)
+func State7(delta):
+#	print(str((1/(get_pos().x - player.get_pos().x)) * 6000 * delta))
+#	print(str(abs(get_pos().x - player.get_pos().x)))
+	print(str(back.get_collider()))
+	move(Vector2((6000/(get_pos().x - player.get_pos().x)),0) * delta)
+	if (abs(get_pos().x - player.get_pos().x) > 200):
+		changestate(8)
+	elif(back.is_colliding() and back.get_collider().is_in_group("wall")):
+		print("back iscolliding")
+		changestate(8)
 
-func State4(delta):
-	pass
+#func State3(delta):
+#	get_node("thrown").heldenemy = true
+#	if direction == -1:
+#		get_node("Sprite").set_flip_h(true)
+#		get_node("thrown/Sprite").set_flip_h(true)
+#		get_node("thrown").trajectory = Vector2(-200,0)
+#	else:
+#		get_node("Sprite").set_flip_h(false)
+#		get_node("thrown/Sprite").set_flip_h(false)
+#		get_node("thrown").trajectory = Vector2(200,0)
+
+#func State3_5(delta):
+#	animator.play("thrown")
+#	get_node("thrown").set_fixed_process(true)
+#	set_pos(Vector2(thrownstartingpos.x + (15 * direction),thrownstartingpos.y))
+#	get_node("thrown").set_collision_mask(1)
+#	get_node("thrown").set_layer_mask(1)
+#	set_collision_mask(2)
+#	set_layer_mask(2)
+#	changestate(4)
+
+func State8(delta):
+	chargetimer += delta
+	
+	move(Vector2(250,0) * direction * delta)
+	
+	if(is_colliding()):
+		if(get_collider().is_in_group("player")):
+			knock_player(player,direction)
+			chargetimer = 0.0
+			changestate(7)
+	
+	if(chargetimer > chargetime):
+		changestate(1)
+		chargetimer = 0.0
+		#implement looking around state
+
+
+
+
 
 func die():
 	queue_free()
 
 func take_damage(var damage):
 	if(cantakedamage):
-		animator.play("stunned")
+#		animator.play("stunned")
 		if(state != 3 and state != 4):
 			state = 2
 		cantakedamage = false
@@ -149,7 +186,7 @@ func take_damage(var damage):
 			get_node("Sprite").set_opacity(0)
 			set_layer_mask(2)
 			set_collision_mask(2)
-			animator.play("death")
+#			animator.play("death")
 
 func knock_player(var player, var direction = 1):
 	print(str(direction))

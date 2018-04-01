@@ -4,6 +4,7 @@ extends KinematicBody2D
 #at player. Maybe add if it hits a wall while swooping it is stunned and falls
 
 #ENEMY VARIABLES
+var maxhealth = 10
 var health = 10
 var speed = Vector2(10,0)
 var damagetaketimer= 0.0
@@ -15,13 +16,14 @@ var damagegivetime = 0.25
 var cangivedamage = true
 var direction = 1
 var velocity = 0.0
-var state = 1 #0 = dead  1 = flying  2 = stun  3 = swooping  4 = right after stun state #make enum some day
+var state = 1 #0 = dead  1 = flying  2 = stun  5 = swooping  6 = right after stun state #make enum some day
 var motions = []
 var stuncounter = 0.0
 var stuncount = 1.0
 var damage = 3
 var dontmove = false
 var flip = false
+var thrownstartingpos = Vector2(0,0)
 #experimental
 var gravity = 125
 
@@ -45,6 +47,8 @@ onready var healthlabel = get_node("Health label")
 
 func _ready():
 	set_fixed_process(true)
+	get_node("thrown").set_collision_mask(2)
+	get_node("thrown").set_layer_mask(2)
 
 func die():
 	queue_free()
@@ -57,7 +61,7 @@ func _fixed_process(delta):
 	
 	if state == 0: #dead
 		die()
-	if state == 1: #alive and moving
+	elif state == 1: #alive and moving
 		positionhorizontal += delta*speedhorizontal
 #		print(positionvertical)
 		positionvertical = sin(thing * 10)
@@ -71,7 +75,7 @@ func _fixed_process(delta):
 		
 		proximitytoplayer = get_pos().distance_to(get_parent().get_node("player").get_pos())
 		if proximitytoplayer < proximitythreshold:
-			state = 3
+			state = 5
 			swoopmultiple = get_parent().get_node("player").get_pos() - get_pos()
 			if swoopmultiple.x/abs(swoopmultiple.x) != direction:
 #				print(swoopmultiple.x)
@@ -79,16 +83,37 @@ func _fixed_process(delta):
 				direction *= -1
 				get_node("Sprite").set_flip_h(!get_node("Sprite").is_flipped_h())
 			animator.play("swoop")
-	if state == 2: #stunned
+	elif state == 2: #stunned
 		stuncounter += delta
 		if stuncounter >= stuncount:
 			stuncounter = 0.0
-			state = 4
+			state = 6
 			thang = 0
 			animator.play("fly")
 		move(Vector2(0,gravity * delta))
+	elif state == 3:
+		get_node("thrown").heldenemy = true
+		if direction == -1:
+			get_node("Sprite").set_flip_h(true)
+			get_node("thrown/Sprite").set_flip_h(true)
+			get_node("thrown").trajectory = Vector2(-200,0)
+		else:
+			get_node("Sprite").set_flip_h(false)
+			get_node("thrown/Sprite").set_flip_h(false)
+			get_node("thrown").trajectory = Vector2(200,0)
+	elif state == 3.5:
+		animator.play("thrown")
+		get_node("thrown").set_fixed_process(true)
+		set_pos(Vector2(thrownstartingpos.x + (15 * direction),thrownstartingpos.y))
+		get_node("thrown").set_collision_mask(1)
+		get_node("thrown").set_layer_mask(1)
+		set_collision_mask(2)
+		set_layer_mask(2)
+		changestate(4)
+	elif state == 4:
+		pass
 	
-	if state == 3: #swooping
+	elif state == 5: #swooping
 		swoop = (sin(thang*3) * (swoopmultiple.y + 40))
 		thang += delta
 		move(Vector2(speedhorizontal * 2 * delta,swoop * delta))
@@ -99,8 +124,7 @@ func _fixed_process(delta):
 		if is_colliding() and get_collider().is_in_group("player"):
 			var collider = get_collider()
 			knock_player(collider,direction)
-	
-	if state == 4: #right after stun to ascend back to starting height
+	elif state == 6: #right after stun to ascend back to starting height
 		move(Vector2(0,-gravity/2 * delta))
 		if(get_pos().y <= defaultheight):
 			state = 1
@@ -152,3 +176,6 @@ func alternate_motion(var delta):
 			motions.clear()
 func add_horizontal_motion(var motion):
 	motions.append(motion)
+
+func changestate(var newstate):
+	state = newstate

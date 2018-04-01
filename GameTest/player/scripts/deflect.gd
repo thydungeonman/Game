@@ -16,12 +16,19 @@ func _fixed_process(delta):
 			if(i.is_in_group("enemy")):
 				queue_free()
 				player.deflectbreakcounter = .6
-			elif(i.is_in_group("flying enemy")):
+			elif(i.is_in_group("flying enemy") and i.state == 5):
 				i.state = 2 #stunned
 				player.deflectbreakcounter = .6
+				queue_free()
+			elif(i.is_in_group("eliteenemy") and i.state == 8):
+				i.state = 2
+				player.deflectbreakcounter = .6
+				i.add_horizontal_motion(Vector2(50,2) * player.input_direction)
+				queue_free()
 			elif(i.is_in_group("projectile") and not beendeflected):
 				print("projectile deflected")
-				i.remove_collision_exception_with(i.get_parent())
+#				i.remove_collision_exception_with(i.get_parent())
+				i.remove_collision_exception_with(i.creatornode)
 				player.deflectbreakcounter = .4
 				var shotdirection = i.trajectory.x / abs(i.trajectory.x) #-1 for going left
 				i.trajectory = Vector2(300,100) 

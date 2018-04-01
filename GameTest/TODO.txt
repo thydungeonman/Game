@@ -32,5 +32,10 @@ invisible ones,
 ones that are invisible until you get close,
 moving ones - not a tile though,
 
+Rebound charging enemy, assume regular charging enemy just sees and charges.
+when player comes within elite enemy area 2d, the enemy will move back at a rate faster than the player can catch up at. Once at a certain distance,
+the enemy will charge at the player. Can't be attacked, must be blocked first to be hit and must be hit while stunned. If same type of enemy is behind this kind,
+the other will also move back when the closest to the player moves back, it will know by the checking the closests state. However the knockback force from
+a punch will send this enemy back a considerable distance, knocking back each enemy behind in a domino effect.
 
 
