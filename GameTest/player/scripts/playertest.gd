@@ -8,6 +8,9 @@ extends KinematicBody2D
 #in the buffer, clearing it, then doing the punch
 #this way all attacks go through the buffer
 
+#BUG
+#If held enemy is killed while held: game crashes
+
 #movement variables
 var direction = 0
 var input_direction = 1
@@ -57,6 +60,7 @@ var attacking = false
 var attacktime = 0.0
 var attackbreakcounter = 0.0 #counter to wait until attackbreak is up
 var attackbreak = .2
+var riderkicked = false
 #deflecting variables
 var deflect = false
 var deflecting = false
@@ -106,6 +110,15 @@ onready var inplabel = get_node("inputlabel")
 onready var molabel = get_node("motionlabel")
 
 var superattacking = false
+
+#animation controller variables
+var bpressed = false
+var apressed = false
+var leftpressed = false
+var rightpressed = false
+var downpressed = false
+
+
 
 func _ready():
 	set_fixed_process(true)
@@ -163,6 +176,7 @@ func GravityFront(var time):
 		timepicked = time
 		changedgravity = true
 		GRAVITY = 0
+		speed = Vector2(0,0)
 
 func InputCancelFront(var time):
 	if pollinginput:
@@ -293,18 +307,25 @@ func GetInputs(delta):
 		if(direction):
 			input_direction = direction
 		if Input.is_action_pressed("ui_right"):
+			if direction == 0 or direction == -1:
+				anim.play("run")
 			direction = 1
 			player_sprite.set_flip_h(false)
+			
 		elif(Input.is_action_pressed("ui_left")):
+			if direction == 0 or direction == 1:
+				anim.play("run")
 				direction = -1
 				player_sprite.set_flip_h(true)
 		elif Input.is_action_pressed("ui_duck"):
-			anim.play("duck")
+			#anim.play("duck")
 			ducking = true
 			direction = 0
 		else:
-			anim.play("restpose")
+			#anim.play("restpose")
 			ducking = false
+			if direction != 0:
+				anim.play("restpose")
 			direction = 0
 #		if(not Input.is_action_pressed("ui_duck")):
 #			ducking = false
@@ -331,6 +352,29 @@ func GetInputs(delta):
 		bunnyhopstopper = false
 		if(onfloor == false):
 			lowjump = false
+	
+	
+	
+	#ANIMATION CONTROLLER
+	if(Input.is_action_pressed("ui_attack")):
+		if bpressed == false and specialing == false:
+			bpressed = true
+			if ducking:
+				pass
+			else:
+				anim.play("punch")
+	else:
+		bpressed = false
+	if(Input.is_action_pressed("ui_duck")):
+		if downpressed == false:
+			downpressed = true
+			anim.play("duck")
+	else:
+		if downpressed:
+			downpressed = false
+			anim.play("restpose")
+	#i believe moving left and right can be handled similarly to ducking
+	
 
 func HandleMovement(delta):
 	if(bunnyhopstopperpart2 == false):
@@ -374,6 +418,7 @@ func HandleMovement(delta):
 				bunnyhopstopperpart2 = false
 				jumping = false
 			onfloor = true
+			riderkicked = false
 			newjumpforce = newjumpforcefull
 			airtime = 0.0
 			jumppresstime = 0.0
@@ -440,6 +485,8 @@ func handle_attack(var delta):
 	attackbreakcounter += delta
 	invincounter += delta
 	if(attack and not attacking and !deflecting and !grabbing and !currentlyholdingenemy and !ducking and attackbreakcounter > attackbreak and !specialing):
+		anim.play("punch")
+		print("punch")
 		print("super attack: ",superattacking)
 		var attack = preload("res://player/scenes/punch.tscn").instance()
 		self.add_child(attack)
@@ -447,12 +494,23 @@ func handle_attack(var delta):
 		attackbreakcounter = 0.0
 		add_horizontal_motion(Vector2(100 * input_direction,10 * input_direction))
 		inputbuffer.clear()
-	elif(attack and not attacking and !deflecting and !grabbing and ducking and attackbreakcounter > attackbreak):
+	elif(attack and not attacking and !deflecting and !grabbing and ducking and onfloor and attackbreakcounter > attackbreak):
 		var attack = preload("res://player/scenes/kick.tscn").instance()
 		self.add_child(attack)
 		attack.set_pos(Vector2(input_direction * 15,10))
 		print("kick")
 		attackbreakcounter = 0.0
+	elif(attack and not attacking and !deflecting and !grabbing and not onfloor and down and attackbreakcounter > attackbreak and !riderkicked):
+		var attack = preload("res://player/scenes/rider kick.tscn").instance()
+		self.add_child(attack)
+		attack.set_pos(Vector2(input_direction * 13,20))
+		print("rider kick")
+		GravityFront(.4)
+		InputCancelFront(.3)
+		add_horizontal_motion(Vector2(input_direction * 300,15 * input_direction))
+		add_vertical_motion(Vector2(300,15))
+		attackbreakcounter = 0.0
+		riderkicked = true
 	attacking = attack
 
 func handle_delfect(var delta):
@@ -535,11 +593,15 @@ func alternate_vertical_motion(delta):
 func add_horizontal_motion(var motion):
 	motions.append(motion)
 	#x is the horizontal motion
-	#y is how much to lower that per second multiplied my delta
+	#y is how much to lower that per second multiplied by delta
 	#remember that the second value must be the same sign as the first as the second is subtracted from the first
 func add_vertical_motion(var motion):
 	verticalmotions.append(motion)
 	airtime = 0.0
+
+func clear_motions():
+	motions.clear()
+	verticalmotions.clear()
 
 #reset damageblink timer to blink
 func damage_blink(delta):

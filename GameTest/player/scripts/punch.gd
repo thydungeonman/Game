@@ -9,6 +9,7 @@ func _ready():
 func _fixed_process(delta):
 	count += delta
 	if(count > punchtime):
+		player.anim.play("restpose")
 		self.queue_free()
 	if(self.get_overlapping_bodies().size() > 0):
 		for i in get_overlapping_bodies():
