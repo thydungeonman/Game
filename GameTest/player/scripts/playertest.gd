@@ -59,7 +59,7 @@ var attack = false
 var attacking = false
 var attacktime = 0.0
 var attackbreakcounter = 0.0 #counter to wait until attackbreak is up
-var attackbreak = .2
+var attackbreak = .32 #.2
 var riderkicked = false
 #deflecting variables
 var deflect = false
@@ -105,6 +105,9 @@ var grabtime = 0.3
 var grabtimer = 0.0
 var currentlyholdingenemy = false
 var heldenemy
+
+var numdashesallowed = 1#var for handling only being able to dash once while in the air
+var numdashes = 0
 
 onready var inplabel = get_node("inputlabel")
 onready var molabel = get_node("motionlabel")
@@ -205,20 +208,22 @@ func handle_input_buffer(delta):
 #			inputtimer = 0.0
 	#CHECKING BUFFER FOR PROPER INPUTS AND THEN ADDING EFFECT
 	if inputbuffer.size() >= 2:
-		if inputbuffer[inputbuffer.size() - 1] == "right" and inputbuffer[inputbuffer.size() - 2] == "right" and taptimer < taptime:
+		if inputbuffer[inputbuffer.size() - 1] == "right" and inputbuffer[inputbuffer.size() - 2] == "right" and taptimer < taptime and numdashes < numdashesallowed:
 			add_horizontal_motion(Vector2(400,20))
 			inputbuffer.clear()
 			GravityFront(.3)
 			speed.y = 0
 			speed.x = 0
 			onfloor = false
-		elif inputbuffer[inputbuffer.size() - 1] == "left" and inputbuffer[inputbuffer.size() - 2] == "left" and taptimer < taptime:
+			numdashes += 1
+		elif inputbuffer[inputbuffer.size() - 1] == "left" and inputbuffer[inputbuffer.size() - 2] == "left" and taptimer < taptime and numdashes < numdashesallowed:
 			add_horizontal_motion(Vector2(-400,-20))
 			inputbuffer.clear()
 			GravityFront(.3)
 			onfloor = false
 			speed.y = 0
 			speed.x = 0
+			numdashes += 1
 		elif inputbuffer[inputbuffer.size() - 3] == "down" and inputbuffer[inputbuffer.size() - 2] == "up" and inputbuffer[inputbuffer.size() - 1] == "attack" and taptimer < taptime:
 			print("SUPER ATTACK")
 			specialing = true
@@ -362,7 +367,8 @@ func GetInputs(delta):
 			if ducking:
 				pass
 			else:
-				anim.play("punch")
+				pass
+				#anim.play("punch")
 	else:
 		bpressed = false
 	if(Input.is_action_pressed("ui_duck")):
@@ -418,6 +424,7 @@ func HandleMovement(delta):
 				bunnyhopstopperpart2 = false
 				jumping = false
 			onfloor = true
+			numdashes = 0
 			riderkicked = false
 			newjumpforce = newjumpforcefull
 			airtime = 0.0
@@ -492,7 +499,8 @@ func handle_attack(var delta):
 		self.add_child(attack)
 		attack.set_pos(Vector2(input_direction * 15,0))
 		attackbreakcounter = 0.0
-		add_horizontal_motion(Vector2(100 * input_direction,10 * input_direction))
+		#add_horizontal_motion(Vector2(100 * input_direction,10 * input_direction))
+		add_horizontal_motion(Vector2(150 * input_direction,5 * input_direction))
 		inputbuffer.clear()
 	elif(attack and not attacking and !deflecting and !grabbing and ducking and onfloor and attackbreakcounter > attackbreak):
 		var attack = preload("res://player/scenes/kick.tscn").instance()

@@ -17,6 +17,8 @@ func _fixed_process(delta):
 				player.health += 1
 				i.take_damage(5)
 				i.add_horizontal_motion(Vector2(200,15)* player.input_direction)
+				if(i.is_in_group("physical")):
+					i.add_vertical_motion(Vector2(-100,-3))
 			elif(i.is_in_group("stationary enemy")):
 				i.take_damage(5)
 				player.health += 1

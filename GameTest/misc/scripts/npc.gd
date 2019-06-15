@@ -17,7 +17,7 @@ func _fixed_process(delta):
 			if Input.is_action_pressed("ui_jump") and spoken == false:
 				speech = preload("res://misc/scenes/bubble alt.tscn").instance()
 				speech.parent = self
-				ref =  weakref(speech)
+				ref = weakref(speech)
 				speech.text = dialog
 				add_child(speech)
 				dead = false
@@ -27,7 +27,7 @@ func _fixed_process(delta):
 			if(dead == false):
 				speech.get_node("AnimationPlayer").play("disappear")
 		spoken = false
-	if(spoken == true):
-		spolabel.set_text(str(speech.charinlinecount))
-		spelabel.set_text(str(speech.linecount))
+	#if(spoken == true):
+		#spolabel.set_text(str(speech.charinlinecount))
+		#spelabel.set_text(str(speech.linecount))
 		#crashes at the end

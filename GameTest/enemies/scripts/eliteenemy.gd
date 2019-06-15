@@ -73,12 +73,12 @@ func State1(delta):
 	move(velocity)
 	if(!right.is_colliding()):
 #		print("collide right")
-		direction = -1
+		direction *= -1
 		revert_motion()
 		speed.x *= -1
 		velocity = speed * delta
 		move(velocity)
-		flip = !flip
+		#flip = !flip
 		set_scale(Vector2(direction,1))
 	if(!left.is_colliding()):
 #		print("collide left")
@@ -87,16 +87,16 @@ func State1(delta):
 		speed.x *= -1
 		velocity = speed * delta
 		move(velocity)
-		flip = !flip
-		set_scale(Vector2(direction,1))
+		#flip = !flip
+		set_scale(Vector2(1,1))
 	if(is_colliding() and (get_collider().is_in_group("enemy") or (get_collider().is_in_group("eliteenemy")) or get_collider().is_in_group("wall"))):
-		direction *= -1
+		#direction *= -1
 		revert_motion()
 		speed.x *= -1
 		velocity = speed * delta
 		move(velocity)
 		flip = !flip
-		set_scale(Vector2(direction,1))
+		set_scale(Vector2(-1,1))
 		
 	if(vision.get_overlapping_bodies().size() > 0):
 		for i in vision.get_overlapping_bodies():
@@ -175,7 +175,6 @@ func take_damage(var damage):
 #		animator.play("stunned")
 		if(state != 3 and state != 4):
 			state = 2
-		cantakedamage = false
 		damagetaketimer = 0.0
 		health -= damage
 		if(health <= 0): #find better way to do this
