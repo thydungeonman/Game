@@ -294,8 +294,6 @@ max_lines_visible = -1
 
 [node name="thrown" parent="." instance=ExtResource( 7 )]
 
-editor/display_folded = true
-
 [node name="Sprite" parent="thrown"]
 
 visibility/visible = false

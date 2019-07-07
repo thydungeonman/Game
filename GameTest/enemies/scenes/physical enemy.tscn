@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=1]
 
 [ext_resource path="res://enemies/scripts/physical enemy.gd" type="Script" id=1]
-[ext_resource path="res://enemies/sprites/fireguy0000.png" type="Texture" id=2]
+[ext_resource path="res://enemies/sprites/NewFireGuy0000.png" type="Texture" id=2]
 
 [sub_resource type="RectangleShape2D" id=1]
 
@@ -45,19 +45,19 @@ autoplay = ""
 
 [node name="downleft" type="RayCast2D" parent="."]
 
-transform/pos = Vector2( -9, -3 )
+transform/pos = Vector2( -9, 6 )
 enabled = true
-cast_to = Vector2( 0, 10 )
+cast_to = Vector2( 0, 5 )
 layer_mask = 1
-type_mask = 15
+type_mask = 1
 
 [node name="downright" type="RayCast2D" parent="."]
 
-transform/pos = Vector2( 9, -3 )
+transform/pos = Vector2( 9, 6 )
 enabled = true
-cast_to = Vector2( 0, 10 )
+cast_to = Vector2( 0, 5 )
 layer_mask = 1
-type_mask = 15
+type_mask = 1
 
 [node name="Label" type="Label" parent="."]
 
@@ -73,20 +73,48 @@ percent_visible = 1.0
 lines_skipped = 0
 max_lines_visible = -1
 
-[node name="forward" type="RayCast2D" parent="."]
+[node name="back" type="RayCast2D" parent="."]
 
-transform/pos = Vector2( -8, 0 )
+transform/pos = Vector2( -8, 5 )
 enabled = true
 cast_to = Vector2( -1, 0 )
 layer_mask = 1
 type_mask = 3
 
-[node name="back" type="RayCast2D" parent="."]
+[node name="forward" type="RayCast2D" parent="."]
 
-transform/pos = Vector2( 8, 0 )
+transform/pos = Vector2( 8, 5 )
 enabled = true
 cast_to = Vector2( 1, 0 )
 layer_mask = 1
 type_mask = 3
+
+[node name="state" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = -3.0
+margin/top = -54.0
+margin/right = 37.0
+margin/bottom = -40.0
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="direction" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 1.0
+margin/top = -39.0
+margin/right = 41.0
+margin/bottom = -25.0
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
 
 

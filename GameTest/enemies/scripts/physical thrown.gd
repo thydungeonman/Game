@@ -1,5 +1,5 @@
 extends KinematicBody2D
-var trajectory = Vector2(300,0)
+var trajectory = Vector2(100,0)
 var facingright = true
 var direction = 1
 var heldenemy = false
@@ -11,17 +11,11 @@ var parentspeed = Vector2()
 
 var knockbackforce = Vector2(200,10)
 func _ready():
+	pass
 #	set_fixed_process(true)
-	add_collision_exception_with(get_parent())
-	if(!facingright):
-		trajectory.x = -trajectory.x
 
 func _fixed_process(delta):
-	print(is_colliding())
-#	if(facingright):
-#		move(speed * delta)
-#	else:
-#		move(-speed * delta)
+	#print(is_colliding())
 	move(trajectory * delta)
 	if(is_colliding()):
 		var collider = get_collider()
@@ -55,3 +49,11 @@ func knock_player(var player, var direction = 1):
 		player.add_vertical_motion(Vector2(-200,-8))
 		player.take_damage(1)
 		player.invincounter = 0.0
+
+func Launch():
+	set_fixed_process(true)
+	trajectory.x *= direction
+
+func FaceLeft():
+	direction = -1
+	get_node("Sprite").set_flip_h(true)

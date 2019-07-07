@@ -416,6 +416,7 @@ func HandleMovement(delta):
 		var normal = get_collision_normal()
 		if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE):
 			#if touched floor or floor with tolerated angle
+			
 			#if holding the jump button right as touching
 			#the ground from a jump
 			if(jumping and bunnyhopstopper):
@@ -481,7 +482,7 @@ func Jump(delta):
 		onfloor = false
 	else:
 		if shortjumpslowdownlockout == true and jumppresstime < .28 and !onfloor and hithead == false:
-			speed.y = -150
+			speed.y = -250#-150
 			shortjumpslowdownlockout = false
 			#bug as a feature? time your jump release to get an additional boost
 		else:
@@ -497,10 +498,11 @@ func handle_attack(var delta):
 		print("super attack: ",superattacking)
 		var attack = preload("res://player/scenes/punch.tscn").instance()
 		self.add_child(attack)
-		attack.set_pos(Vector2(input_direction * 15,0))
+		attack.set_pos(Vector2(input_direction * 18,0))
 		attackbreakcounter = 0.0
 		#add_horizontal_motion(Vector2(100 * input_direction,10 * input_direction))
-		add_horizontal_motion(Vector2(150 * input_direction,5 * input_direction))
+		if(onfloor):
+			add_horizontal_motion(Vector2(150 * input_direction,5 * input_direction))
 		inputbuffer.clear()
 	elif(attack and not attacking and !deflecting and !grabbing and ducking and onfloor and attackbreakcounter > attackbreak):
 		var attack = preload("res://player/scenes/kick.tscn").instance()
@@ -544,6 +546,7 @@ func handle_grab(var delta):
 		if(grab and !grabbing): #pressing button again to throw
 			heldenemy.changestate(3.5)
 			heldenemy.thrownstartingpos = get_pos()
+			print(str(get_pos()))
 			remove_child(heldenemy)
 			get_parent().add_child(heldenemy)
 			currentlyholdingenemy = false

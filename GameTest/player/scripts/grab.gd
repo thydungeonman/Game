@@ -20,14 +20,15 @@ func _fixed_process(delta):
 					print(i.state)
 					if(!grabbing):
 						i.add_collision_exception_with(player)
-						i.get_node("thrown").add_collision_exception_with(player)
+						if(!i.is_in_group("physical")):
+							i.get_node("thrown").add_collision_exception_with(player)
 						print(i.get_parent())
 						i.get_parent().remove_child(i)
 						player.add_child(i,true)
 						player.heldenemy = i
 						i.set_pos(Vector2(0,-25))
 						i.changestate(3)
-						i.animator.play("stunned")
+						#i.animator.play("stunned")
 						print(i.get_parent())
 						grabbing = true
 						#do other stuff  raise enemy to over head

@@ -3,6 +3,7 @@ extends KinematicBody2D
 #ENEMY VARIABLES
 var maxhealth = 50
 var health = 50
+var standardspeed = 20
 var go = 20
 var speed = Vector2(0,0)
 var damagetaketimer= 0.0
@@ -12,7 +13,7 @@ var knockbackforce = Vector2(200,7)
 var damagegivetimer = 0.0
 var damagegivetime = 0.25
 var cangivedamage = true
-var direction = -1
+var direction = 1
 var velocity = 0.0
 var state = 1 #0 = dead 1 = walking 2 = stun  3 = held  4 = thrown # make enum some day
 var motions = []
@@ -22,20 +23,23 @@ var stuncount = .5
 var damage = 3
 var dontmove = false
 var thrownstartingpos = Vector2(0,0)
-var flip = false
-onready var left = get_node("downleft")
-onready var right = get_node("downright")
-onready var wallleft = get_node("forward")
-onready var wallright = get_node("back")
+var flip = false # for flipping the sprite
+var onfloor = true
+
+
+onready var downleft = get_node("downleft")
+onready var downright = get_node("downright")
+onready var wallright = get_node("forward")
+onready var wallleft = get_node("back")
 
 onready var sprite = get_node("Sprite")
 onready var animator = get_node("AnimationPlayer")
 #onready var particles = get_node("Particles2D")
 #onready var healthlabel = get_node("healthlabel")
 
-var gravity = 1100
+var gravity = 800
 export(float) var FLOOR_ANGLE_TOLERANCE = 40.0
-
+var thrown #thrown enemy scene. 
 
 func _ready():
 	set_fixed_process(true)
@@ -46,7 +50,10 @@ func _ready():
 
 func _fixed_process(delta):
 	#healthlabel.set_text(str(health))
-	get_node("Label").set_text(str(speed.y))
+	get_node("Label").set_text(str(speed))
+	get_node("state").set_text(str(state))
+	get_node("direction").set_text(str(direction))
+	
 	alternate_motion(delta)
 	alternate_vertical_motion(delta)
 	damagegivetimer += delta
@@ -60,6 +67,8 @@ func _fixed_process(delta):
 		cangivedamage = true
 	else:
 		cangivedamage = false
+	
+	
 	if(state == 1): #ALIVE
 		State1(delta)
 	elif(state == 2): #STUNNED
@@ -79,21 +88,42 @@ func State1(delta):
 	speed.y += gravity * delta
 	velocity = speed * delta
 	var remainder = move(velocity)
+	#print(str(downleft.is_colliding()))
+	if((!downleft.is_colliding()) and onfloor and direction == -1): # may want to specify direction as well at some point
+		direction = 1
+		sprite.set_flip_h(false)
+		wallleft.set_enabled(false)
+		wallright.set_enabled(true)
+	if(!downright.is_colliding() and onfloor and direction == 1):
+		direction = -1
+		sprite.set_flip_h(true)
+		wallleft.set_enabled(true)
+		wallright.set_enabled(false)
 	if(wallleft.is_colliding()):
+		#print(str(wallleft.get_collider().is_in_group("wall")))
 		if(wallleft.get_collider().is_in_group("wall") or wallleft.get_collider().is_in_group("enemy")):
 			direction = 1
-			sprite.set_flip_h(true)
+			sprite.set_flip_h(false)
+			wallleft.set_enabled(false)
+			wallright.set_enabled(true)
 	if(wallright.is_colliding()):
 		if(wallright.get_collider().is_in_group("wall") or wallright.get_collider().is_in_group("enemy")):
 			direction = -1
-			sprite.set_flip_h(false)
+			sprite.set_flip_h(true)
+			wallleft.set_enabled(true)
+			wallright.set_enabled(false)
+
+#	
 	if(is_colliding()):
 		var normal = get_collision_normal()
 		if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE):
+			onfloor = true
 			remainder = normal.slide(remainder)
 			velocity = normal.slide(velocity)
 			move(remainder)
 		speed.y = normal.slide(Vector2(0,speed.y)).y
+	else:
+		onfloor = false
 	
 	if(is_colliding() and get_collider().is_in_group("player") and cangivedamage):
 		print("enemy hit player")
@@ -103,6 +133,7 @@ func State1(delta):
 func State2(delta):
 	go = 0
 	speed.y += gravity * delta
+	speed.x = go * direction
 	velocity = speed * delta
 	var remainder = move(velocity)
 	if(is_colliding()):
@@ -111,39 +142,37 @@ func State2(delta):
 			remainder = normal.slide(remainder)
 			velocity = normal.slide(velocity)
 			move(remainder)
-		speed.y = normal.slide(Vector2(0,speed.y)).y
+		speed.y = speed.y/-20 #normal.slide(Vector2(0,speed.y)).y
 	
 	stuncounter += delta
 	if(stuncounter > stuncount):
 		stuncounter = 0
-		speed
-		state = 1
-		go = 20
+		go = standardspeed
 		animator.play("walk")
+		state = 1
 		
 func State3(delta):
-	get_node("thrown").heldenemy = true
+	motions.clear()
+	verticalmotions.clear()
+	#print("global pos:" + str(get_global_pos()))
 	if direction == -1:
 		get_node("Sprite").set_flip_h(true)
-		get_node("thrown/Sprite").set_flip_h(true)
-		get_node("thrown").trajectory = Vector2(-200,0)
 	else:
 		get_node("Sprite").set_flip_h(false)
-		get_node("thrown/Sprite").set_flip_h(false)
-		get_node("thrown").trajectory = Vector2(200,0)
 
 func State3_5(delta):
-	animator.play("thrown")
-	get_node("thrown").set_fixed_process(true)
-	set_pos(Vector2(thrownstartingpos.x + (15 * direction),thrownstartingpos.y))
-	get_node("thrown").set_collision_mask(1)
-	get_node("thrown").set_layer_mask(1)
-	set_collision_mask(2)
-	set_layer_mask(2)
+	thrown = preload("res://enemies/scenes/physical thrown.tscn").instance()
+	get_parent().add_child(thrown)
+	print("global pos:" + str(get_global_pos()))
+	thrown.set_global_pos(thrownstartingpos + Vector2(20*direction,0))
+	thrown.add_collision_exception_with(self)
+	if(direction == -1):
+		thrown.FaceLeft()
 	changestate(4)
 
 func State4(delta):
-	pass
+	thrown.Launch()
+	queue_free()
 
 func die():
 	queue_free()
@@ -167,7 +196,7 @@ func take_damage(var damage):
 			animator.play("death")
 
 func knock_player(var player, var direction = 1):
-	print(str(direction))
+	#print(str(direction))
 	if(cangivedamage and player.invincounter > player.invintime):
 		var alteredknockbackforce = knockbackforce * direction
 		player.add_horizontal_motion(alteredknockbackforce)
@@ -182,7 +211,7 @@ func alternate_motion(var delta):
 		#print(str(motions[0]))
 		for n in range(motions.size()):
 			var rest = move(Vector2(motions[n].x,0) * delta)
-			print(str(motions[n]) + " " + str(n))
+			#print(str(motions[n]) + " " + str(n))
 			motions[n].x -= motions[n].y
 		var finished = null
 		for n in motions:

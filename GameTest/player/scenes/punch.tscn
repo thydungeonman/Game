@@ -6,7 +6,7 @@
 [sub_resource type="RectangleShape2D" id=1]
 
 custom_solver_bias = 0.0
-extents = Vector2( 5, 5 )
+extents = Vector2( 7, 7 )
 
 [node name="punch" type="Area2D"]
 
@@ -28,7 +28,8 @@ _update_shape_index = 0
 
 [node name="Sprite" type="Sprite" parent="."]
 
-transform/pos = Vector2( -4.76837e-07, 0 )
+transform/pos = Vector2( -1.19209e-07, -3.57628e-07 )
+transform/scale = Vector2( 1.4, 1.4 )
 texture = ExtResource( 2 )
 
 
