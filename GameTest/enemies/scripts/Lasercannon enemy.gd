@@ -28,10 +28,6 @@ var onfloor = true
 var outsideforce = Vector2(0,0)
 
 
-onready var downleft = get_node("downleft")
-onready var downright = get_node("downright")
-onready var wallright = get_node("forward")
-onready var wallleft = get_node("back")
 
 onready var sprite = get_node("Sprite")
 onready var animator = get_node("AnimationPlayer")
@@ -41,21 +37,36 @@ onready var animator = get_node("AnimationPlayer")
 var gravity = 13
 var airfriction = 20.1
 
+var firinglaser = false
+var firetimer = 0.0
+var firetime = 2.0
+var trajectory = 90
+var laser
+onready var vision = get_node("vision")
+
 export(float) var FLOOR_ANGLE_TOLERANCE = 40.0
 var thrown #thrown enemy scene. 
 
 func _ready():
 	set_fixed_process(true)
 	#animator.play("restpose")
-	animator.play("walk")
+	#animator.play("walk")
 	#get_node("thrown").set_collision_mask(2)
 	#get_node("thrown").set_layer_mask(2)
 
 func _fixed_process(delta):
 	#healthlabel.set_text(str(health))
-	get_node("Label").set_text(str(speed))
-	get_node("state").set_text(str(state))
-	get_node("direction").set_text(str(direction))
+#	get_node("Label").set_text(str(speed))
+#	get_node("state").set_text(str(state))
+#	get_node("direction").set_text(str(direction))
+	firetimer += delta
+	if(firetimer > firetime):
+		fireLaser()
+		firetimer = 0
+		
+	if(firinglaser):
+		#laser.set_rotd(laser.get_rotd() + .1)
+		pass
 	
 	alternate_motion(delta)
 	alternate_vertical_motion(delta)
@@ -85,81 +96,15 @@ func _fixed_process(delta):
 	
 
 func State1(delta):
-	#KEEP TIME
-	#MOVEMENT
-	CalculateVelocity(delta)
-	var remainder = move(velocity)
-	#print(str(downleft.is_colliding()))
-	if((!downleft.is_colliding()) and onfloor and direction == -1): # may want to specify direction as well at some point
-		direction = 1
-		sprite.set_flip_h(false)
-		wallleft.set_enabled(false)
-		wallright.set_enabled(true)
-		print("floor flip to the right")
-	if(!downright.is_colliding() and onfloor and direction == 1):
-		direction = -1
-		sprite.set_flip_h(true)
-		wallleft.set_enabled(true)
-		wallright.set_enabled(false)
-		print("floor flip to the left")
-	if(wallleft.is_colliding()):
-		#print(str(wallleft.get_collider().is_in_group("wall")))
-		if(wallleft.get_collider().is_in_group("wall") or wallleft.get_collider().is_in_group("enemy")):
-			direction = 1
-			sprite.set_flip_h(false)
-			wallleft.set_enabled(false)
-			wallright.set_enabled(true)
-			print("wall flip to the right")
-			print(str(wallleft.get_collider().get_groups()))
-	if(wallright.is_colliding()):
-		if(wallright.get_collider().is_in_group("wall") or wallright.get_collider().is_in_group("enemy")):
-			direction = -1
-			sprite.set_flip_h(true)
-			wallleft.set_enabled(true)
-			wallright.set_enabled(false)
-			print("wall flip to the left")
-			print(str(wallright.get_collider().get_groups()))
+	pass
 
-#	
-	if(is_colliding()):
-		var normal = get_collision_normal()
-		if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE):
-			onfloor = true
-			remainder = normal.slide(remainder)
-			velocity = normal.slide(velocity)
-			move(remainder)
-		speed.y = normal.slide(Vector2(0,speed.y)).y
-	else:
-		onfloor = false
-	
-	if(is_colliding() and get_collider().is_in_group("player") and cangivedamage):
-		print("enemy hit player")
-		var player = get_collider()
-		knock_player(player,direction)
-
-func State2(delta):
-	if(!downleft.is_colliding() and !downright.is_colliding() and onfloor == true):
-		onfloor = false
-		print("yp")
-	
-	animator.play("stun")
-	go = 0
-	CalculateVelocity(delta)
-	var remainder = move(velocity)
-	if(is_colliding()):
-		var normal = get_collision_normal()
-		if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE):
-			remainder = normal.slide(remainder)
-			velocity = normal.slide(velocity)
-			move(remainder)
-			onfloor = true
-		speed.y = speed.y/-2 #normal.slide(Vector2(0,speed.y)).y
+func State2(delta):	
+	#animator.play("stun")
 	
 	stuncounter += delta
-	if(stuncounter > stuncount and onfloor):
+	if(stuncounter > stuncount):
 		stuncounter = 0
-		go = standardspeed
-		animator.play("walk")
+		#animator.play("walk")
 		state = 1
 		
 func State3(delta):
@@ -173,18 +118,20 @@ func State3(delta):
 		get_node("Sprite").set_flip_h(false)
 
 func State3_5(delta):
-	thrown = preload("res://enemies/scenes/physical thrown.tscn").instance()
-	get_parent().add_child(thrown)
-	print("global pos:" + str(get_global_pos()))
-	thrown.set_global_pos(thrownstartingpos + Vector2(20*direction,0))
-	thrown.add_collision_exception_with(self)
-	if(direction == -1):
-		thrown.FaceLeft()
-	changestate(4)
+#	thrown = preload("res://enemies/scenes/physical thrown.tscn").instance()
+#	get_parent().add_child(thrown)
+#	print("global pos:" + str(get_global_pos()))
+#	thrown.set_global_pos(thrownstartingpos + Vector2(20*direction,0))
+#	thrown.add_collision_exception_with(self)
+#	if(direction == -1):
+#		thrown.FaceLeft()
+#	changestate(4)
+	pass
 
 func State4(delta):
-	thrown.Launch()
-	queue_free()
+#	thrown.Launch()
+#	queue_free()
+	pass
 
 func die():
 	queue_free()
@@ -205,7 +152,8 @@ func take_damage(var damage):
 			get_node("Sprite").set_opacity(0)
 			set_layer_mask(2)
 			set_collision_mask(2)
-			animator.play("death")
+			die()
+			#animator.play("death")
 
 func knock_player(var player, var direction = 1):
 	#print(str(direction))
@@ -266,4 +214,18 @@ func CalculateVelocity(delta):
 
 	outsideforce = Vector2(0,0)
 	velocity = speed * delta
+
+func fireLaser():
+	var foundbody = false
+	for body in vision.get_overlapping_bodies():
+		if(body.is_in_group("player")):
+			var position = body.get_global_pos()
+			trajectory = get_angle_to(position)
+			foundbody = true
+	if(foundbody):
+		laser = preload("res://enemies/scenes/laser.tscn").instance()
+		add_child(laser)
+		laser.set_rot(trajectory - PI)
+		#laser.Fire()
+
 

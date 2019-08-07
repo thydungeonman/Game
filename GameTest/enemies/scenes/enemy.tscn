@@ -1,8 +1,8 @@
 [gd_scene load_steps=15 format=1]
 
 [ext_resource path="res://enemies/scripts/Enemy.gd" type="Script" id=1]
-[ext_resource path="res://enemies/sprites/fireguywalk2Frame1.png" type="Texture" id=2]
-[ext_resource path="res://enemies/sprites/fireguystun2Frame1Frame1.png" type="Texture" id=3]
+[ext_resource path="res://enemies/sprites/fireguystun2Frame1Frame1.png" type="Texture" id=2]
+[ext_resource path="res://enemies/sprites/fireguywalk2Frame1.png" type="Texture" id=3]
 [ext_resource path="res://enemies/sprites/fireguythrow1.png" type="Texture" id=4]
 [ext_resource path="res://enemies/sprites/fireguythrow2.png" type="Texture" id=5]
 [ext_resource path="res://enemies/sprites/fireguywalk2Copy_Frame1.png" type="Texture" id=6]
@@ -54,7 +54,7 @@ tracks/0/keys = {
 "times": FloatArray( 0 ),
 "transitions": FloatArray( 1 ),
 "update": 1,
-"values": [ ExtResource( 2 ) ]
+"values": [ ExtResource( 3 ) ]
 }
 tracks/1/type = "value"
 tracks/1/path = NodePath("Particles2D:config/emitting")
@@ -100,7 +100,7 @@ tracks/0/keys = {
 "times": FloatArray( 0 ),
 "transitions": FloatArray( 1 ),
 "update": 1,
-"values": [ ExtResource( 3 ) ]
+"values": [ ExtResource( 2 ) ]
 }
 
 [sub_resource type="Animation" id=5]
@@ -153,7 +153,7 @@ tracks/0/keys = {
 "times": FloatArray( 0, 0.2 ),
 "transitions": FloatArray( 1, 1 ),
 "update": 1,
-"values": [ ExtResource( 2 ), ExtResource( 6 ) ]
+"values": [ ExtResource( 3 ), ExtResource( 6 ) ]
 }
 
 [sub_resource type="RectangleShape2D" id=7]

@@ -1,5 +1,5 @@
 extends KinematicBody2D
-var trajectory = Vector2(100,0)
+var trajectory = Vector2(250,0)
 var facingright = true
 var direction = 1
 var heldenemy = false

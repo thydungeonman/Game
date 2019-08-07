@@ -59,7 +59,7 @@ var attack = false
 var attacking = false
 var attacktime = 0.0
 var attackbreakcounter = 0.0 #counter to wait until attackbreak is up
-var attackbreak = .32 #.2
+var attackbreak = .30 #.2
 var riderkicked = false
 #deflecting variables
 var deflect = false
@@ -111,6 +111,7 @@ var numdashes = 0
 
 onready var inplabel = get_node("inputlabel")
 onready var molabel = get_node("motionlabel")
+onready var area = get_node("Area2D")
 
 var superattacking = false
 
@@ -141,8 +142,16 @@ func _process(delta):
 
 
 func _fixed_process(delta):
+	
+	if(Input.is_action_pressed("ui_deflect")):
+		if(numdashes > 0):
+			for body in area.get_overlapping_bodies():
+				if(body.is_in_group("enemy")):
+					motions.clear()
+	
 	#get_node("label").set_text(str(airtime))
 	get_node("label").set_text("Health: " + str(health))
+	get_node("normallabel").set_text("overlaps: "+str(get_node("Area2D").get_overlapping_bodies().size()))
 	#GRAVITY
 	GravityChange(delta)
 	#ALTERNATE MOTIONS
@@ -434,7 +443,7 @@ func HandleMovement(delta):
 			hithead = false
 			speed.y = normal.slide(Vector2(0,speed.y)).y
 			floorvel = get_collider_velocity()
-			get_node("normallabel").set_text(str(airtime))
+			#get_node("normallabel").set_text(str(airtime))
 			get_node("Label").set_text(str(presstime))
 		if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE and get_collider().is_in_group("button")):
 			get_collider().anim.play("closed")
@@ -492,7 +501,7 @@ func handle_attack(var delta):
 	
 	attackbreakcounter += delta
 	invincounter += delta
-	if(attack and not attacking and !deflecting and !grabbing and !currentlyholdingenemy and !ducking and attackbreakcounter > attackbreak and !specialing):
+	if(attack and !attacking and !deflecting and !grabbing and !currentlyholdingenemy and !ducking and attackbreakcounter > attackbreak and !specialing and !Input.is_action_pressed("ui_up")):
 		anim.play("punch")
 		print("punch")
 		print("super attack: ",superattacking)
@@ -502,7 +511,7 @@ func handle_attack(var delta):
 		attackbreakcounter = 0.0
 		#add_horizontal_motion(Vector2(100 * input_direction,10 * input_direction))
 		if(onfloor):
-			add_horizontal_motion(Vector2(150 * input_direction,5 * input_direction))
+			add_horizontal_motion(Vector2(100 * input_direction,5 * input_direction))
 		inputbuffer.clear()
 	elif(attack and not attacking and !deflecting and !grabbing and ducking and onfloor and attackbreakcounter > attackbreak):
 		var attack = preload("res://player/scenes/kick.tscn").instance()
@@ -521,6 +530,13 @@ func handle_attack(var delta):
 		add_vertical_motion(Vector2(300,15))
 		attackbreakcounter = 0.0
 		riderkicked = true
+	elif(attack and not attacking and !deflecting and !grabbing and !currentlyholdingenemy and !ducking and attackbreakcounter > attackbreak and !specialing and Input.is_action_pressed("ui_up")):
+		anim.play("punch")
+		var attack = preload("res://player/scenes/uppercut.tscn").instance()
+		self.add_child(attack)
+		attack.set_pos(Vector2(input_direction * 18,0))
+		attackbreakcounter = 0.0
+		print("uppercut")
 	attacking = attack
 
 func handle_delfect(var delta):
@@ -554,6 +570,7 @@ func handle_grab(var delta):
 
 
 func take_damage(var damage):
+	get_node("CameraAnimator").play("rumble")
 	InputCancelFront(1.0)
 	damageblinktimer = 0.0
 	get_node("label").set_text(str(health))
