@@ -50,6 +50,7 @@ var health = 10
 var presstime= 0.0
 var invincounter = 0.0  
 var invintime = 1.5 # make sure this is synced up with the blink time
+var damageblinktime = 1.5
 var damageblinktimer = 5 #this is high so the player doesnt start blinking
 var damageblinking = false
 #duck variable
@@ -569,19 +570,24 @@ func handle_grab(var delta):
 	grabbing = grab
 
 
-func take_damage(var damage):
-	get_node("CameraAnimator").play("rumble")
-	InputCancelFront(1.0)
-	damageblinktimer = 0.0
+func take_damage(var damage, var stun = true):
+	
+	
 	get_node("label").set_text(str(health))
-	attackbreakcounter = 0.0
+	
 	if(invincounter > invintime):
+		if(stun):
+			InputCancelFront(1.0)
+		attackbreakcounter = 0.0
+		damageblinktimer = 0.0
+		get_node("CameraAnimator").play("rumble")
 		invincounter = 0.0
 		health -= damage
 		speed.y = 0
 		print("health is "+str(health))
 		if(health <= 0):
 			get_node("label").set_text("GAME OVER")
+
 
 #for knockbacks when taking damage
 func alternate_motion(var delta):
@@ -634,7 +640,7 @@ func clear_motions():
 #reset damageblink timer to blink
 func damage_blink(delta):
 	damageblinktimer += delta
-	if(damageblinktimer < 1.5):
+	if(damageblinktimer < damageblinktime):
 		damageblinking = true
 		if((fmod(damageblinktimer,.33)) > .17):
 			player_sprite.hide()
