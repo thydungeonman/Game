@@ -30,7 +30,7 @@ var outsideforce = Vector2(0,0)
 
 
 onready var sprite = get_node("Sprite")
-onready var animator = get_node("AnimationPlayer")
+#onready var animator = get_node("AnimationPlayer")
 #onready var particles = get_node("Particles2D")
 #onready var healthlabel = get_node("healthlabel")
 
@@ -108,7 +108,7 @@ func State2(delta):
 		state = 1
 		
 func State3(delta):
-	animator.play("stun")
+	#animator.play("stun")
 	motions.clear()
 	verticalmotions.clear()
 	#print("global pos:" + str(get_global_pos()))

@@ -25,7 +25,7 @@ export(int) var ACCELERATION = 1700
 export(int) var DECELERATION = 2000
 export(int) var LOW_JUMP_FORCE = 350
 export(int) var JUMP_FORCE = 150
-export(int) var GRAVITY = 1800 #1800
+export(int) var GRAVITY = 30 #1800
 export(float) var FLOOR_ANGLE_TOLERANCE = 40.0
 #jumping variables
 var shortjumpslowdownlockout = false
@@ -91,7 +91,7 @@ var specialing = false
 var makingscreenbigger = false
 var makingscreensmaller = false
 #Gravity changing variables
-var defaultgravityvalue = 1800
+var defaultgravityvalue = 30
 var timepicked = 0.0
 var gravitytimer = 0.0
 var changedgravity = false
@@ -122,6 +122,8 @@ var apressed = false
 var leftpressed = false
 var rightpressed = false
 var downpressed = false
+
+var outsideforce = 0
 
 
 
@@ -406,7 +408,10 @@ func HandleMovement(delta):
 	speed.x = clamp(speed.x,0,MAX_SPEED)
 	speed.y = clamp(speed.y, -500,400)
 	velocity.x = speed.x * input_direction * delta
-	speed.y += GRAVITY * delta
+	speed.y += GRAVITY
+	if(outsideforce < 0):
+		speed.y += outsideforce
+		outsideforce = 0 
 	velocity.y = speed.y * delta
 	
 	var remainder = move(velocity)
@@ -446,6 +451,8 @@ func HandleMovement(delta):
 			floorvel = get_collider_velocity()
 			#get_node("normallabel").set_text(str(airtime))
 			get_node("Label").set_text(str(presstime))
+			if(get_collider().is_in_group("bouncer")):
+				get_collider().bounce(self)
 		if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE and get_collider().is_in_group("button")):
 			get_collider().anim.play("closed")
 			#trigger button events
@@ -649,4 +656,10 @@ func damage_blink(delta):
 	else:
 		damageblinking = false
 
+func add_outside_force(var force):
+	outsideforce = force
 
+func CalculateVelocity():
+	
+	
+	pass

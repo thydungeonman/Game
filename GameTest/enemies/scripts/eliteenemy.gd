@@ -123,7 +123,7 @@ func State7(delta):
 	if (abs(get_pos().x - player.get_pos().x) > 200):
 		changestate(8)
 	elif(back.is_colliding() and back.get_collider().is_in_group("wall")):
-		print("back iscolliding")
+		print("back is colliding")
 		changestate(8)
 
 #func State3(delta):

@@ -2,7 +2,8 @@ extends KinematicBody2D
 #script for an enemy that does moves on its own back and forth, and has physics
 #requires raycasts: forward, back, downleft, downright
 #forward begin towards the right, back to the left, the others being on those sides and pointing down
-#all raycasts should only cast upon static bodies
+#all raycasts should only cast upon static bodies except for forward and back
+#which also cast upon kinematic bodies
 
 #groups: physical, enemy
 
@@ -112,22 +113,43 @@ func State1(delta):
 			print(str(wallright.get_collider().get_groups()))
 
 	
-	if(is_colliding()):
-		var normal = get_collision_normal()
-		if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE):
-			onfloor = true
-			remainder = normal.slide(remainder)
-			velocity = normal.slide(velocity)
-			move(remainder)
-		speed.y = normal.slide(Vector2(0,speed.y)).y
-	else:
-		onfloor = false
-	
-	if(is_colliding() and get_collider().is_in_group("player") and cangivedamage):
+		if(is_colliding() and get_collider().is_in_group("player") and cangivedamage):
+
 		print("enemy hit player")
+
 		var player = get_collider()
+
 		knock_player(player,direction)
-	pass
+
+	if(is_colliding()):
+
+		var normal = get_collision_normal()
+
+		if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE):
+
+			onfloor = true
+
+			
+
+			if(get_collider() != null):
+
+				if(get_collider().is_in_group("bouncer")):
+
+					get_collider().bounce(self)
+
+					onfloor = false
+
+			speed.y = normal.slide(Vector2(0,speed.y)).y
+
+		else:
+
+			remainder = normal.slide(remainder)
+
+			velocity = normal.slide(velocity)
+
+			move(remainder)
+
+			onfloor = false
 	
 
 func State2(delta):

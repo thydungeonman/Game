@@ -20,7 +20,7 @@ func _fixed_process(delta):
 				#i.add_horizontal_motion(Vector2(270,10)* player.input_direction)
 				if(i.is_in_group("physical")):
 					#i.add_vertical_motion(Vector2(-150,-5))
-					i.add_outside_force(Vector2(0,-200))
+					i.add_outside_force(-200)
 					i.add_horizontal_motion(Vector2(150*player.input_direction,3*player.input_direction))
 			elif(i.is_in_group("stationary enemy")):
 				i.take_damage(5)

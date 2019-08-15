@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=1]
+[gd_scene load_steps=5 format=1]
 
 [ext_resource path="res://enemies/scripts/mook.gd" type="Script" id=1]
 [ext_resource path="res://player/sprites/playerstanding0000.png" type="Texture" id=2]
@@ -7,6 +7,11 @@
 
 custom_solver_bias = 0.0
 extents = Vector2( 10, 15 )
+
+[sub_resource type="RectangleShape2D" id=2]
+
+custom_solver_bias = 0.0
+extents = Vector2( 135, 42 )
 
 [node name="mook" type="KinematicBody2D" groups=[
 "enemy",
@@ -35,34 +40,138 @@ texture = ExtResource( 2 )
 
 [node name="forward" type="RayCast2D" parent="."]
 
-transform/pos = Vector2( 0, 7 )
+transform/pos = Vector2( 11, 7 )
 enabled = true
-cast_to = Vector2( 12, 0 )
+cast_to = Vector2( 2, 0 )
 layer_mask = 1
-type_mask = 1
+type_mask = 3
 
 [node name="back" type="RayCast2D" parent="."]
 
-transform/pos = Vector2( 0, 7 )
+transform/pos = Vector2( -11, 7 )
 enabled = false
-cast_to = Vector2( -12, 0 )
+cast_to = Vector2( -2, 0 )
 layer_mask = 1
-type_mask = 1
+type_mask = 3
 
 [node name="downleft" type="RayCast2D" parent="."]
 
-transform/pos = Vector2( 11, 8 )
+transform/pos = Vector2( -11, 8 )
 enabled = true
-cast_to = Vector2( 0, 12 )
+cast_to = Vector2( 0, 9 )
 layer_mask = 1
 type_mask = 1
 
 [node name="downright" type="RayCast2D" parent="."]
 
-transform/pos = Vector2( -11, 8 )
+transform/pos = Vector2( 11, 8 )
 enabled = true
-cast_to = Vector2( 0, 12 )
+cast_to = Vector2( 0, 9 )
 layer_mask = 1
 type_mask = 1
+
+[node name="friendlyvisionright" type="RayCast2D" parent="."]
+
+transform/pos = Vector2( 17, 0 )
+enabled = true
+cast_to = Vector2( 75, 0 )
+layer_mask = 1
+type_mask = 2
+
+[node name="friendlyvisionleft" type="RayCast2D" parent="."]
+
+transform/pos = Vector2( -17, 0 )
+enabled = true
+cast_to = Vector2( -75, 0 )
+layer_mask = 1
+type_mask = 2
+
+[node name="vision" type="Area2D" parent="."]
+
+input/pickable = true
+shapes/0/shape = SubResource( 2 )
+shapes/0/transform = Matrix32( 1, 0, 0, 1, 0, -31 )
+shapes/0/trigger = false
+gravity_vec = Vector2( 0, 1 )
+gravity = 98.0
+linear_damp = 0.1
+angular_damp = 1.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="vision"]
+
+transform/pos = Vector2( 0, -31 )
+shape = SubResource( 2 )
+trigger = false
+_update_shape_index = 0
+
+[node name="onfloorlabel" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = -2.0
+margin/top = -47.0
+margin/right = 38.0
+margin/bottom = -33.0
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="foundplayerlabel" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = -1.0
+margin/top = -65.0
+margin/right = 39.0
+margin/bottom = -51.0
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="mooklabelleft" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 17.0
+margin/top = -22.0
+margin/right = 57.0
+margin/bottom = -8.0
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="mooklabelright" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = -52.0
+margin/top = -20.0
+margin/right = -12.0
+margin/bottom = -6.0
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="golabel" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = -22.0
+margin/top = -79.0
+margin/right = 18.0
+margin/bottom = -65.0
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
 
 

@@ -5,5 +5,5 @@ func _ready():
 	pass
 
 
-func bounce(var player):
-	player.add_vertical_force()
+func bounce(var bouncee):
+	bouncee.add_outside_force(-500)

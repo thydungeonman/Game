@@ -19,13 +19,13 @@ var state = 1 #0 = dead 1 = walking 2 = stun  3 = held  4 = thrown # make enum s
 var motions = []
 var verticalmotions = []
 var stuncounter = 0.0
-var stuncount = .5
+var stuncount = .8
 var damage = 3
 var dontmove = false
 var thrownstartingpos = Vector2(0,0)
 var flip = false # for flipping the sprite
 var onfloor = true
-var outsideforce = Vector2(0,0)
+var outsideforce = 0#Vector2(0,0)
 
 
 onready var downleft = get_node("downleft")
@@ -119,23 +119,26 @@ func State1(delta):
 			wallright.set_enabled(false)
 			print("wall flip to the left")
 			print(str(wallright.get_collider().get_groups()))
-
-#	
-	if(is_colliding()):
-		var normal = get_collision_normal()
-		if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE):
-			onfloor = true
-			remainder = normal.slide(remainder)
-			velocity = normal.slide(velocity)
-			move(remainder)
-		speed.y = normal.slide(Vector2(0,speed.y)).y
-	else:
-		onfloor = false
-	
+			
 	if(is_colliding() and get_collider().is_in_group("player") and cangivedamage):
 		print("enemy hit player")
 		var player = get_collider()
 		knock_player(player,direction)
+	if(is_colliding()):
+		var normal = get_collision_normal()
+		if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE):
+			onfloor = true
+			
+			if(get_collider() != null):
+				if(get_collider().is_in_group("bouncer")):
+					get_collider().bounce(self)
+					onfloor = false
+			speed.y = normal.slide(Vector2(0,speed.y)).y
+		else:
+			remainder = normal.slide(remainder)
+			velocity = normal.slide(velocity)
+			move(remainder)
+			onfloor = false
 
 func State2(delta):
 	if(!downleft.is_colliding() and !downright.is_colliding() and onfloor == true):
@@ -261,9 +264,9 @@ func add_outside_force(var force):
 func CalculateVelocity(delta):
 	speed.x = go * direction 
 	speed.y += gravity
-	speed += outsideforce
+	speed.y += outsideforce
 	
 
-	outsideforce = Vector2(0,0)
+	outsideforce = 0
 	velocity = speed * delta
 
