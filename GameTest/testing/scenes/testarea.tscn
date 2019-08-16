@@ -527,11 +527,11 @@ transform/pos = Vector2( -1010, -306 )
 
 [connection signal="Pressed" from="button 3" to="door 3" method="_on_button_Pressed"]
 
+[connection signal="Pressed" from="button 4" to="appearingblock1" method="_on_button_Pressed"]
+
 [connection signal="Pressed" from="button 4" to="appearingblock2" method="_on_button_Pressed"]
 
 [connection signal="Pressed" from="button 4" to="appearingblock" method="_on_button_Pressed"]
-
-[connection signal="Pressed" from="button 4" to="appearingblock1" method="_on_button_Pressed"]
 
 
 [editable path="player"]

@@ -174,4 +174,18 @@ percent_visible = 1.0
 lines_skipped = 0
 max_lines_visible = -1
 
+[node name="stoppedlabel" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = -17.0
+margin/top = 21.0
+margin/right = 23.0
+margin/bottom = 35.0
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
 

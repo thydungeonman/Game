@@ -54,7 +54,7 @@ onready var friendlyvisionleft = get_node("friendlyvisionleft")
 onready var friendlyvisionright = get_node("friendlyvisionright")
 onready var onfloorlabel = get_node("onfloorlabel")
 onready var foundplayerlabel = get_node("foundplayerlabel")
-
+onready var stoppedlabel = get_node("stoppedlabel")
 onready var mooklabelleft = get_node("mooklabelleft")
 onready var mooklabelright = get_node("mooklabelright")
 
@@ -68,7 +68,8 @@ func _fixed_process(delta):
 	#get_node("state").set_text(str(state))
 	#get_node("direction").set_text(str(direction))
 	onfloorlabel.set_text(str(onfloor))
-	
+	stoppedlabel.set_text(str(stopped))
+	get_node("golabel").set_text(str(go))
 	damagegivetimer += delta
 	damagetaketimer += delta
 	
@@ -200,7 +201,8 @@ func State5(delta): #found player, enter attack mode
 	#if friendly mook is between this and player
 	#maintain distance between this and friendly mook
 	if(!stopped and !foundplayer):
-		WobblyMovement(delta)
+		changestate(1)
+		return
 	
 	if(!stopped and foundplayer):
 		WobblyPlayerMovement(delta)
@@ -256,9 +258,6 @@ func State5(delta): #found player, enter attack mode
 			velocity = normal.slide(velocity)
 			move(remainder)
 			onfloor = false
-	
-	
-	pass
 
 func State6(delta): #found player but friendly is front
 	
@@ -371,8 +370,6 @@ func WobblyMovement(delta):
 	wobbly += delta
 	go = abs(sin(wobbly * 2) * 60)
 	
-	get_node("golabel").set_text(str(go))
-	pass
 
 func StopMoving():
 	go = 0
@@ -383,9 +380,13 @@ func StartMoving():
 	stopped = false
 
 func WobblyPlayerMovement(delta):
-	var point = (get_pos().x - player.get_pos().x) / 2
-	
-	
+	var distance = abs(get_pos().x - player.get_pos().x)
+	if (distance <= 60):
+		go = -50
+		if(distance <= 40):
+			go = -67 # wacky bug where go can't go below -69
+	elif(distance > 100):
+		go = 90
 
 
 func LookForPlayer():
@@ -402,7 +403,6 @@ func LookForPlayer():
 		foundplayer = false
 		foundplayerlabel.set_text("lost player")
 	else:
-		foundplayerlabel.set_text("lost player"
-		)
+		foundplayerlabel.set_text("lost player")
 		foundplayer = false
 
