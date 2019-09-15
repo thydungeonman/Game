@@ -19,7 +19,7 @@ var cangivedamage = true
 var direction = 1
 var state = 1 #0 = dead 1 = walking 2 = stun  3 = held  4 = thrown # make enum some day
 var stuncounter = 0.0
-var stuncount = .5
+var stuncount = .8
 var damage = 3
 
 var outsideforce = 0
@@ -44,10 +44,11 @@ var standardspeed = 20
 var go = 30
 
 var player = null
+var friendly = null
 
 var wobbly = 0
 var stopped = false
-
+var distance = 0
 
 onready var vision = get_node("vision")
 onready var friendlyvisionleft = get_node("friendlyvisionleft")
@@ -57,6 +58,7 @@ onready var foundplayerlabel = get_node("foundplayerlabel")
 onready var stoppedlabel = get_node("stoppedlabel")
 onready var mooklabelleft = get_node("mooklabelleft")
 onready var mooklabelright = get_node("mooklabelright")
+onready var statelabel = get_node("statelabel")
 
 func _ready():
 	set_fixed_process(true)
@@ -69,6 +71,7 @@ func _fixed_process(delta):
 	#get_node("direction").set_text(str(direction))
 	onfloorlabel.set_text(str(onfloor))
 	stoppedlabel.set_text(str(stopped))
+	statelabel.set_text(str(state))
 	get_node("golabel").set_text(str(go))
 	damagegivetimer += delta
 	damagetaketimer += delta
@@ -85,6 +88,7 @@ func _fixed_process(delta):
 	alternate_motion(delta)
 	alternate_vertical_motion(delta)
 	
+	
 	if(state == 1): #ALIVE
 		State1(delta)
 	elif(state == 2): #STUNNED
@@ -97,6 +101,8 @@ func _fixed_process(delta):
 		State4(delta)
 	elif(state == 5):
 		State5(delta)
+	elif(state == 6):
+		State6(delta)
 
 func State1(delta):
 	
@@ -150,7 +156,7 @@ func State1(delta):
 			velocity = normal.slide(velocity)
 			move(remainder)
 			onfloor = false
-	
+	LookForFriendly()
 
 func State2(delta):
 	if(!downleft.is_colliding() and !downright.is_colliding() and onfloor == true):
@@ -226,6 +232,7 @@ func State5(delta): #found player, enter attack mode
 			StartMoving()
 	if(wallleft.is_colliding()):
 		if(wallleft.get_collider().is_in_group("wall") or wallleft.get_collider().is_in_group("enemy")):
+			print(wallleft.get_collider().get_name())
 			if(foundplayer):
 				StopMoving()
 			else:
@@ -233,6 +240,7 @@ func State5(delta): #found player, enter attack mode
 				StartMoving()
 	if(wallright.is_colliding()):
 		if(wallright.get_collider().is_in_group("wall") or wallright.get_collider().is_in_group("enemy")):
+			print(wallright.get_collider().get_name())
 			if(foundplayer):
 				StopMoving()
 			else:
@@ -259,10 +267,29 @@ func State5(delta): #found player, enter attack mode
 			move(remainder)
 			onfloor = false
 
-func State6(delta): #found player but friendly is front
+func State6(delta): #found friendly that has found player
+	WobblyFriendlyMovement(delta)
+	CalculateVelocity(delta)
+	var remainder = move(velocity)
 	
-	
-	pass
+	if(is_colliding()):
+		var normal = get_collision_normal()
+		if(rad2deg(acos(normal.dot(Vector2(0,-1)))) < FLOOR_ANGLE_TOLERANCE):
+			onfloor = true
+			
+			if(get_collider() != null):
+				if(get_collider().is_in_group("bouncer")):
+					get_collider().bounce(self)
+					onfloor = false
+			speed.y = normal.slide(Vector2(0,speed.y)).y
+		else:
+			remainder = normal.slide(remainder)
+			velocity = normal.slide(velocity)
+			move(remainder)
+			onfloor = false
+		LookForPlayerRaycast()
+	CheckFriendly()
+
 
 
 func take_damage(var damage):
@@ -368,8 +395,8 @@ func FaceRight():
 func WobblyMovement(delta):
 	
 	wobbly += delta
-	go = abs(sin(wobbly * 2) * 60)
-	
+	go = abs(sin(wobbly * 2) * 80)
+
 
 func StopMoving():
 	go = 0
@@ -380,11 +407,20 @@ func StartMoving():
 	stopped = false
 
 func WobblyPlayerMovement(delta):
-	var distance = abs(get_pos().x - player.get_pos().x)
+	distance = abs(get_pos().x - player.get_pos().x)
 	if (distance <= 60):
 		go = -50
 		if(distance <= 40):
-			go = -67 # wacky bug where go can't go below -69
+			go = -170
+	elif(distance > 100):
+		go = 90
+
+func WobblyFriendlyMovement(delta):
+	distance = abs(get_pos().x - friendly.get_pos().x)
+	if (distance <= 60):
+		go = -50
+		if(distance <= 40):
+			go = -170
 	elif(distance > 100):
 		go = 90
 
@@ -406,3 +442,52 @@ func LookForPlayer():
 		foundplayerlabel.set_text("lost player")
 		foundplayer = false
 
+func LookForFriendly():
+	if(friendlyvisionleft).is_colliding():
+		if(friendlyvisionleft.get_collider().is_in_group("mook")):
+			if(friendlyvisionleft.get_collider().foundplayer or friendlyvisionleft.get_collider().state == 6):
+				friendly = friendlyvisionleft.get_collider()
+				FaceLeft()
+				changestate(6)
+				mooklabelleft.set_text("1")
+				pass
+			else:
+				mooklabelleft.set_text("0")
+	else:
+		mooklabelleft.set_text("0")
+	if(friendlyvisionright).is_colliding():
+		if(friendlyvisionright.get_collider().is_in_group("mook")):
+			if(friendlyvisionright.get_collider().foundplayer or friendlyvisionright.get_collider().state == 6):
+				friendly = friendlyvisionright.get_collider()
+				FaceRight()
+				changestate(6)
+				mooklabelright.set_text("1")
+				pass
+			else:
+				mooklabelright.set_text("0")
+	else:
+		mooklabelright.set_text("0")
+
+func CheckFriendly():
+	if(friendly.state == 1):
+		friendly = null
+		foundplayer = false
+		changestate(1)
+
+
+func LookForPlayerRaycast():
+	if(friendlyvisionleft).is_colliding():
+		if(friendlyvisionleft.get_collider().is_in_group("player")):
+				player = friendlyvisionleft.get_collider()
+				foundplayer = true
+				FaceLeft()
+				changestate(5)
+				foundplayerlabel.set_text("1")
+	if(friendlyvisionright).is_colliding():
+		if(friendlyvisionright.get_collider().is_in_group("player")):
+				player = friendlyvisionright.get_collider()
+				foundplayer = true
+				FaceRight()
+				changestate(5)
+				foundplayerlabel.set_text("1")
+				pass

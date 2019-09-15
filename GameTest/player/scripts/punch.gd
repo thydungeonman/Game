@@ -13,13 +13,12 @@ func _fixed_process(delta):
 		self.queue_free()
 	if(self.get_overlapping_bodies().size() > 0):
 		for i in get_overlapping_bodies():
-			if(i.is_in_group("enemy") and (i.state == 1 or i.state == 2)):
+			if(i.is_in_group("enemy") and (i.state == 1 or i.state == 2 or i.state == 5)):
 				#player.attackbreakcounter = .1
 				player.health += 1
 				i.take_damage(5)
 				#i.add_horizontal_motion(Vector2(270,10)* player.input_direction)
 				if(i.is_in_group("physical")):
-					#i.add_vertical_motion(Vector2(-150,-5))
 					i.add_outside_force(-200)
 					i.add_horizontal_motion(Vector2(150*player.input_direction,3*player.input_direction))
 			elif(i.is_in_group("stationary enemy")):

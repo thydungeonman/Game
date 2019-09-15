@@ -46,8 +46,9 @@ var hithead = false
 onready var player_sprite = get_node("Sprite")
 onready var anim = get_node("AnimationPlayer")
 #health and damage variables
-var health = 10
+onready var health = get_node("/root/global").health
 var presstime= 0.0
+
 var invincounter = 0.0  
 var invintime = 1.5 # make sure this is synced up with the blink time
 var damageblinktime = 1.5
@@ -128,6 +129,7 @@ var outsideforce = 0
 
 
 func _ready():
+	
 	set_fixed_process(true)
 	set_process(true)
 	set_process_input(true)
@@ -661,5 +663,8 @@ func add_outside_force(var force):
 
 func CalculateVelocity():
 	
-	
 	pass
+
+func StoreVariables():
+	var globe = get_node("/root/global")
+	globe.health = health
