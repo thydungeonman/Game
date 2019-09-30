@@ -50,6 +50,9 @@ var wobbly = 0
 var stopped = false
 var distance = 0
 
+var lungetimer = 0.0
+var lungetime = 1.5
+
 onready var vision = get_node("vision")
 onready var friendlyvisionleft = get_node("friendlyvisionleft")
 onready var friendlyvisionright = get_node("friendlyvisionright")
@@ -103,6 +106,8 @@ func _fixed_process(delta):
 		State5(delta)
 	elif(state == 6):
 		State6(delta)
+	elif(state == 7):
+		State7(delta)
 
 func State1(delta):
 	
@@ -290,6 +295,21 @@ func State6(delta): #found friendly that has found player
 		LookForPlayerRaycast()
 	CheckFriendly()
 
+func State7(delta): #lunging
+	if lungetimer == 0.0:
+		add_outside_force(-200)
+		go = 175
+	CalculateVelocity(delta)
+	move(velocity)
+	
+	if(is_colliding()):
+		if(get_collider().is_in_group("player")):
+			knock_player(get_collider(),direction)
+	
+	lungetimer += delta
+	if lungetimer > (lungetime - .7):
+		lungetimer = 0.0
+		changestate(1)
 
 
 func take_damage(var damage):
@@ -414,6 +434,11 @@ func WobblyPlayerMovement(delta):
 			go = -170
 	elif(distance > 100):
 		go = 90
+	if(distance < 90):
+		lungetimer += delta
+		if(lungetimer > lungetime):
+			lungetimer = 0.0
+			changestate(7)
 
 func WobblyFriendlyMovement(delta):
 	distance = abs(get_pos().x - friendly.get_pos().x)
@@ -445,10 +470,12 @@ func LookForPlayer():
 func LookForFriendly():
 	if(friendlyvisionleft).is_colliding():
 		if(friendlyvisionleft.get_collider().is_in_group("mook")):
-			if(friendlyvisionleft.get_collider().foundplayer or friendlyvisionleft.get_collider().state == 6):
+			if(friendlyvisionleft.get_collider().foundplayer or friendlyvisionleft.get_collider().state == 6
+			or friendlyvisionleft.get_collider().state == 7):
 				friendly = friendlyvisionleft.get_collider()
 				FaceLeft()
 				changestate(6)
+				lungetimer = 0.0
 				mooklabelleft.set_text("1")
 				pass
 			else:
@@ -457,10 +484,12 @@ func LookForFriendly():
 		mooklabelleft.set_text("0")
 	if(friendlyvisionright).is_colliding():
 		if(friendlyvisionright.get_collider().is_in_group("mook")):
-			if(friendlyvisionright.get_collider().foundplayer or friendlyvisionright.get_collider().state == 6):
+			if(friendlyvisionright.get_collider().foundplayer or friendlyvisionright.get_collider().state == 6 
+			or friendlyvisionright.get_collider().state == 7):
 				friendly = friendlyvisionright.get_collider()
 				FaceRight()
 				changestate(6)
+				lungetimer = 0.0
 				mooklabelright.set_text("1")
 				pass
 			else:

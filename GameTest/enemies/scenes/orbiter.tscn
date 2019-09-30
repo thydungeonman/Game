@@ -8,28 +8,31 @@
 custom_solver_bias = 0.0
 extents = Vector2( 10, 10 )
 
-[sub_resource type="RectangleShape2D" id=2]
+[sub_resource type="RayShape2D" id=2]
 
 custom_solver_bias = 0.0
-extents = Vector2( 12, 2 )
+length = 0.0
 
-[sub_resource type="RectangleShape2D" id=3]
-
-custom_solver_bias = 0.0
-extents = Vector2( 12, 2 )
-
-[sub_resource type="RectangleShape2D" id=4]
+[sub_resource type="RayShape2D" id=3]
 
 custom_solver_bias = 0.0
-extents = Vector2( 2, 12 )
+length = 0.0
 
-[sub_resource type="RectangleShape2D" id=5]
+[sub_resource type="RayShape2D" id=4]
 
 custom_solver_bias = 0.0
-extents = Vector2( 2, 12 )
+length = 0.0
 
-[node name="orbiter" type="KinematicBody2D"]
+[sub_resource type="RayShape2D" id=5]
 
+custom_solver_bias = 0.0
+length = 0.0
+
+[node name="orbiter" type="KinematicBody2D" groups=[
+"enemy",
+]]
+
+transform/pos = Vector2( 0, 1 )
 input/pickable = false
 shapes/0/shape = SubResource( 1 )
 shapes/0/transform = Matrix32( 1, 0, 0, 1, 0, 0 )
@@ -50,78 +53,280 @@ _update_shape_index = 0
 transform/scale = Vector2( 0.33, 0.33 )
 texture = ExtResource( 2 )
 
-[node name="up" type="Area2D" parent="."]
+[node name="upleft" type="Area2D" parent="."]
 
-transform/pos = Vector2( 0, -13 )
+transform/pos = Vector2( -8, -13 )
 input/pickable = true
 shapes/0/shape = SubResource( 2 )
-shapes/0/transform = Matrix32( 1, 0, 0, 1, -1, 0 )
+shapes/0/transform = Matrix32( -1, -0.00085512, 0.00085512, -1, -2, 2 )
 shapes/0/trigger = false
 gravity_vec = Vector2( 0, 1 )
 gravity = 98.0
 linear_damp = 0.1
 angular_damp = 1.0
+collision/layers = 2
+collision/mask = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="up"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="upleft"]
 
-transform/pos = Vector2( -1, 0 )
+transform/pos = Vector2( -2, 2 )
+transform/rot = 179.951
 shape = SubResource( 2 )
 trigger = false
 _update_shape_index = 0
 
-[node name="down" type="Area2D" parent="."]
+[node name="upright" type="Area2D" parent="."]
 
-transform/pos = Vector2( 0, 13 )
+transform/pos = Vector2( 8, -13 )
 input/pickable = true
-shapes/0/shape = SubResource( 3 )
-shapes/0/transform = Matrix32( 1, 0, 0, 1, 0, 0 )
+shapes/0/shape = SubResource( 2 )
+shapes/0/transform = Matrix32( -1, -0.00085512, 0.00085512, -1, 2, 2 )
 shapes/0/trigger = false
 gravity_vec = Vector2( 0, 1 )
 gravity = 98.0
 linear_damp = 0.1
 angular_damp = 1.0
+collision/layers = 2
+collision/mask = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="down"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="upright"]
 
+transform/pos = Vector2( 2, 2 )
+transform/rot = 179.951
+shape = SubResource( 2 )
+trigger = false
+_update_shape_index = 0
+
+[node name="downleft" type="Area2D" parent="."]
+
+transform/pos = Vector2( -7, 13 )
+input/pickable = true
+shapes/0/shape = SubResource( 3 )
+shapes/0/transform = Matrix32( 1, 0, 0, 1, -3, -2 )
+shapes/0/trigger = false
+gravity_vec = Vector2( 0, 1 )
+gravity = 98.0
+linear_damp = 0.1
+angular_damp = 1.0
+collision/layers = 2
+collision/mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="downleft"]
+
+transform/pos = Vector2( -3, -2 )
 shape = SubResource( 3 )
 trigger = false
 _update_shape_index = 0
 
-[node name="left" type="Area2D" parent="."]
+[node name="downright" type="Area2D" parent="."]
 
-transform/pos = Vector2( -13, 0 )
+transform/pos = Vector2( 7, 13 )
 input/pickable = true
-shapes/0/shape = SubResource( 4 )
-shapes/0/transform = Matrix32( 1, 0, 0, 1, 0, 1 )
+shapes/0/shape = SubResource( 3 )
+shapes/0/transform = Matrix32( 1, 0, 0, 1, 3, -2 )
 shapes/0/trigger = false
 gravity_vec = Vector2( 0, 1 )
 gravity = 98.0
 linear_damp = 0.1
 angular_damp = 1.0
+collision/layers = 2
+collision/mask = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="left"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="downright"]
 
-transform/pos = Vector2( 0, 1 )
+transform/pos = Vector2( 3, -2 )
+shape = SubResource( 3 )
+trigger = false
+_update_shape_index = 0
+
+[node name="lefttop" type="Area2D" parent="."]
+
+transform/pos = Vector2( -13, -8 )
+input/pickable = true
+shapes/0/shape = SubResource( 4 )
+shapes/0/transform = Matrix32( -0.0034279, 0.999994, -0.999994, -0.0034279, 2, -2 )
+shapes/0/trigger = false
+gravity_vec = Vector2( 0, 1 )
+gravity = 98.0
+linear_damp = 0.1
+angular_damp = 1.0
+collision/layers = 2
+collision/mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="lefttop"]
+
+transform/pos = Vector2( 2, -2 )
+transform/rot = -90.1964
 shape = SubResource( 4 )
 trigger = false
 _update_shape_index = 0
 
-[node name="right" type="Area2D" parent="."]
+[node name="leftbottom" type="Area2D" parent="."]
 
-transform/pos = Vector2( 13, 0 )
+transform/pos = Vector2( -13, 8 )
 input/pickable = true
-shapes/0/shape = SubResource( 5 )
-shapes/0/transform = Matrix32( 1, 0, 0, 1, 0, 0 )
+shapes/0/shape = SubResource( 4 )
+shapes/0/transform = Matrix32( -0.0034279, 0.999994, -0.999994, -0.0034279, 2, 2 )
 shapes/0/trigger = false
 gravity_vec = Vector2( 0, 1 )
 gravity = 98.0
 linear_damp = 0.1
 angular_damp = 1.0
+collision/layers = 2
+collision/mask = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="right"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="leftbottom"]
 
+transform/pos = Vector2( 2, 2 )
+transform/rot = -90.1964
+shape = SubResource( 4 )
+trigger = false
+_update_shape_index = 0
+
+[node name="righttop" type="Area2D" parent="."]
+
+transform/pos = Vector2( 13, 0 )
+input/pickable = true
+shapes/0/shape = SubResource( 5 )
+shapes/0/transform = Matrix32( 0.00568621, -0.999984, 0.999984, 0.00568621, -2, -10 )
+shapes/0/trigger = false
+gravity_vec = Vector2( 0, 1 )
+gravity = 98.0
+linear_damp = 0.1
+angular_damp = 1.0
+collision/layers = 2
+collision/mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="righttop"]
+
+transform/pos = Vector2( -2, -10 )
+transform/rot = 89.6742
 shape = SubResource( 5 )
 trigger = false
 _update_shape_index = 0
+
+[node name="rightbottom" type="Area2D" parent="."]
+
+transform/pos = Vector2( 13, 15 )
+input/pickable = true
+shapes/0/shape = SubResource( 5 )
+shapes/0/transform = Matrix32( 0.00568621, -0.999984, 0.999984, 0.00568621, -2, -5 )
+shapes/0/trigger = false
+gravity_vec = Vector2( 0, 1 )
+gravity = 98.0
+linear_damp = 0.1
+angular_damp = 1.0
+collision/layers = 2
+collision/mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="rightbottom"]
+
+transform/pos = Vector2( -2, -5 )
+transform/rot = 89.6742
+shape = SubResource( 5 )
+trigger = false
+_update_shape_index = 0
+
+[node name="toprightcorner" type="Area2D" parent="."]
+
+transform/pos = Vector2( 13, -8 )
+input/pickable = true
+shapes/0/shape = SubResource( 5 )
+shapes/0/transform = Matrix32( 0.00568621, -0.999984, 0.999984, 0.00568621, -2, -7 )
+shapes/0/trigger = false
+gravity_vec = Vector2( 0, 1 )
+gravity = 98.0
+linear_damp = 0.1
+angular_damp = 1.0
+collision/layers = 2
+collision/mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="toprightcorner"]
+
+transform/pos = Vector2( -2, -7 )
+transform/rot = 89.6742
+shape = SubResource( 5 )
+trigger = false
+_update_shape_index = 0
+
+[node name="topleftcorner" type="Area2D" parent="."]
+
+transform/pos = Vector2( -17, -8 )
+input/pickable = true
+shapes/0/shape = SubResource( 5 )
+shapes/0/transform = Matrix32( 0.00568621, -0.999984, 0.999984, 0.00568621, -2, -7 )
+shapes/0/trigger = false
+gravity_vec = Vector2( 0, 1 )
+gravity = 98.0
+linear_damp = 0.1
+angular_damp = 1.0
+collision/layers = 2
+collision/mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="topleftcorner"]
+
+transform/pos = Vector2( -2, -7 )
+transform/rot = 89.6742
+shape = SubResource( 5 )
+trigger = false
+_update_shape_index = 0
+
+[node name="bottomleftcorner" type="Area2D" parent="."]
+
+transform/pos = Vector2( -17, 22 )
+input/pickable = true
+shapes/0/shape = SubResource( 5 )
+shapes/0/transform = Matrix32( 0.00568621, -0.999984, 0.999984, 0.00568621, -2, -7 )
+shapes/0/trigger = false
+gravity_vec = Vector2( 0, 1 )
+gravity = 98.0
+linear_damp = 0.1
+angular_damp = 1.0
+collision/layers = 2
+collision/mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="bottomleftcorner"]
+
+transform/pos = Vector2( -2, -7 )
+transform/rot = 89.6742
+shape = SubResource( 5 )
+trigger = false
+_update_shape_index = 0
+
+[node name="bottomrightcorner" type="Area2D" parent="."]
+
+transform/pos = Vector2( 13, 22 )
+input/pickable = true
+shapes/0/shape = SubResource( 5 )
+shapes/0/transform = Matrix32( 0.00568621, -0.999984, 0.999984, 0.00568621, -2, -7 )
+shapes/0/trigger = false
+gravity_vec = Vector2( 0, 1 )
+gravity = 98.0
+linear_damp = 0.1
+angular_damp = 1.0
+collision/layers = 2
+collision/mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="bottomrightcorner"]
+
+transform/pos = Vector2( -2, -7 )
+transform/rot = 89.6742
+shape = SubResource( 5 )
+trigger = false
+_update_shape_index = 0
+
+[node name="Label" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = -6.0
+margin/top = -31.0
+margin/right = 34.0
+margin/bottom = -17.0
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
 
 

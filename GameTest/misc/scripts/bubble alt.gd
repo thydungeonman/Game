@@ -19,6 +19,7 @@ func _ready():
 	set_fixed_process(true)
 	set_process_input(true)
 	anim.play("appear")
+
 func _fixed_process(delta):
 	timer += delta
 	if Input.is_action_pressed("ui_jump"):

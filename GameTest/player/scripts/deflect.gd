@@ -13,10 +13,7 @@ func _fixed_process(delta):
 		self.queue_free()
 	if(self.get_overlapping_bodies().size() > 0):
 		for i in get_overlapping_bodies():
-			if(i.is_in_group("enemy")):
-				queue_free()
-				player.deflectbreakcounter = .6
-			elif(i.is_in_group("flying enemy") and i.state == 5):
+			if(i.is_in_group("flying enemy") and i.state == 5):
 				i.state = 2 #stunned
 				player.deflectbreakcounter = .6
 				queue_free()
@@ -25,6 +22,10 @@ func _fixed_process(delta):
 				player.deflectbreakcounter = .6
 				i.add_horizontal_motion(Vector2(50,2) * player.input_direction)
 				queue_free()
+			elif(i.is_in_group("mook") and i.state == 7):
+				i.state = 2
+				player.deflectbreakcounter = .6
+				i.add_horizontal_motion(Vector2(25,2) * player.input_direction)
 			elif(i.is_in_group("projectile") and not beendeflected):
 				print("projectile deflected")
 #				i.remove_collision_exception_with(i.get_parent())
